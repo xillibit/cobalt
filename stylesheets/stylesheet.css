@@ -64,16 +64,17 @@ a:hover {
 }
 
 header {
-  padding-top: 35px;
+  padding-top: 65px;
   padding-bottom: 25px;
 }
 
 header h1 {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, serif; font-weight: 900;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, serif;
   letter-spacing: -1px;
   font-size: 48px;
   color: #303030;
   line-height: 1.2;
+  font-weight: 300;
 }
 
 header h2 {
@@ -87,11 +88,6 @@ header h2 {
 #container {
   background: transparent url(../images/highlight-bg.jpg) 50% 0 no-repeat;
   min-height: 595px;
-}
-
-.inner {
-  width: 620px;
-  margin: 0 auto;
 }
 
 #container .inner img {
@@ -277,35 +273,6 @@ h6 {
 p {
   font-weight: 300;
   margin-bottom: 20px;
-}
- 
-a {
-  text-decoration: none;
-}
-
-p a {
-  font-weight: 400;
-}
-
-blockquote {
-  font-size: 1.6em;
-  border-left: 10px solid #e9e9e9;
-  margin-bottom: 20px;
-  padding: 0 0 0 30px;
-}
-
-ul li {
-  list-style: disc inside;
-  padding-left: 20px;
-}
-
-ol li {
-  list-style: decimal inside;
-  padding-left: 3px;
-}
-
-dl dt {
-  color: #303030;
 }
 
 footer {
