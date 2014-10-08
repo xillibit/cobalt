@@ -10,6 +10,8 @@
 
 namespace Cobalt\View\Note;
 
+use Cobalt\Helper\NoteHelper;
+use JFactory;
 use Joomla\View\AbstractHtmlView;
 
 defined( '_CEXEC' ) or die( 'Restricted access' );
@@ -19,6 +21,9 @@ class Phtml extends AbstractHtmlView
 {
     public function render()
     {
+        $app = JFactory::getApplication();
+        $this->categories = NoteHelper::getCategories();
+
         return parent::render();
     }
 }

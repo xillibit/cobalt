@@ -8,7 +8,9 @@
         <div class="title_holder">
             <a href="<?php echo RouteHelper::_('index.php?view=companies&layout=company&company_id='.$company['id']); ?>"><?php echo $company['name']; ?></a>
         </div>
-        <address><?php echo $company['address_formatted']; ?></address>
+        <?php if (isset($company['address_formatted'])): ?>
+            <address><?php echo $company['address_formatted']; ?></address>
+        <?php endif; ?>
         <div class="hidden"><small><?php echo $company['description']; ?></small></div>
     </td>
     <td class="contact" ><?php echo $company['phone'].'<br>'.$company['email']; ?></td>
@@ -16,8 +18,8 @@
     <td class="updated" ><?php echo DateHelper::formatDate($company['modified']); ?></td>
     <td class="notes" >
         <div class="btn-group">
-            <a rel="tooltip" title="<?php echo TextHelper::_('COBALT_VIEW_CONTACTS'); ?>" data-placement="bottom" class="btn" href="javascript:void(0);" onclick="showCompanyContactsDialogModal(<?php echo $company['id']; ?>);"><i class="icon-user"></i></a>
-            <a rel="tooltip" title="<?php echo TextHelper::_('COBALT_VIEW_NOTES'); ?>" data-placement="bottom" class="btn" href="javascript:void(0);" onclick="openNoteModal(<?php echo $company['id']; ?>,'company');"><i class="icon-file"></i></a>
+            <a rel="tooltip" title="<?php echo TextHelper::_('COBALT_VIEW_CONTACTS'); ?>" data-placement="bottom" class="btn" href="javascript:void(0);" onclick="showCompanyContactsDialogModal(<?php echo $company['id']; ?>);"><i class="glyphicon glyphicon-user"></i></a>
+            <a rel="tooltip" title="<?php echo TextHelper::_('COBALT_VIEW_NOTES'); ?>" data-placement="bottom" class="btn" href="javascript:void(0);" onclick="Calendar.openNoteModal(<?php echo $company['id']; ?>,'company');"><i class="glyphicon glyphicon-file"></i></a>
         </div>
     </td>
 </tr>

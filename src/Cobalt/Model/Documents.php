@@ -25,10 +25,10 @@ class Documents extends DefaultModel
 
     public function store($data=null)
     {
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
 
         //Load Tables
-        $row = new DocumentsTable;
+        $row = $this->getTable('Documents');
         if ($data==null) {
             $data = $app->input->getRequest( 'post' );
         }
@@ -44,25 +44,16 @@ class Documents extends DefaultModel
         $data['shared'] = 1;
 
         // Bind the form fields to the table
-        if (!$row->bind($data)) {
-            $this->setError($this->db->getErrorMsg());
+	    try
+	    {
+		    $row->save($data);
+	    }
+	    catch (\Exception $exception)
+	    {
+		    $this->app->enqueueMessage($exception->getMessage(), 'error');
 
-            return false;
-        }
-
-        // Make sure the record is valid
-        if (!$row->check()) {
-            $this->setError($this->db->getErrorMsg());
-
-            return false;
-        }
-
-        // Store the web link table to the database
-        if (!$row->store()) {
-            $this->setError($this->db->getErrorMsg());
-
-            return false;
-        }
+		    return false;
+	    }
 
         return true;
     }
@@ -110,7 +101,7 @@ class Documents extends DefaultModel
     public function populateState()
     {
         //get states
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
         $filter_order = $app->getUserStateFromRequest('Documents.filter_order','filter_order','d.filename');
         $filter_order_Dir = $app->getUserStateFromRequest('Documents.filter_order_Dir','filter_order_Dir','asc');
 
@@ -207,9 +198,9 @@ class Documents extends DefaultModel
         $hash = md5($fileName).".".$uploadedFileExtension;
 
         //always use constants when making file paths, to avoid the possibilty of remote file inclusion
-        $uploadPath = JPATH_SITE.'/uploads/'.$hash;
+        $uploadPath = JPATH_ROOT.'/uploads/'.$hash;
 
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
 
         if (!File::upload($fileTemp, $uploadPath)) {
             $msg = TextHelper::_('COBALT_DOC_UPLOAD_FAIL');

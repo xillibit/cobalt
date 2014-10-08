@@ -17,19 +17,19 @@ use Cobalt\Model\People as PeopleModel;
 // no direct access
 defined( '_CEXEC' ) or die( 'Restricted access' );
 
- class DropdownHelper
- {
+class DropdownHelper
+{
 
-     public static function generateDropdown($type,$selection=null,$name=null, $raw=false)
-     {
-         //base html
-         $html = '';
+    public static function generateDropdown($type, $selection = null, $name = null, $raw = false)
+    {
+        //base html
+        $html = '';
 
         //grab db
-        $db = \Cobalt\Container::get('db');
+        $db = \Cobalt\Container::fetch('db');
 
         //generate query based on type
-         $query = $db->getQuery(true);
+        $query = $db->getQuery(true);
 
         switch ($type) {
             case "company":
@@ -51,7 +51,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
                 $query->select('d.id,d.name');
                 $query->from("#__deals AS d");
                 $query->where("d.published > 0");
-                $query->leftJoin('#__users AS user ON user.id = d.owner_id');
+                $query->leftJoin('#__users AS users ON users.id = d.owner_id');
                 /** ---------------------------------------------------------------
                  * Filter data using member role permissions
                  */
@@ -61,7 +61,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
                 if ($member_role != 'exec') {
                      //manager filter
                     if ($member_role == 'manager') {
-                        $query->where('user.team_id = '.$team_id);
+                        $query->where('users.team_id = '.$team_id);
                     } else {
                     //basic user filter
                         $query->where(array('d.owner_id = '.$member_id));
@@ -74,6 +74,13 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
         if ($query!="") {
             $db->setQuery($query);
             $row = $db->loadAssocList();
+        }
+
+        if ($type == 'owner')
+        {
+            $me = array(array('label' => TextHelper::_('COBALT_ME'), 'value' => UsersHelper::getLoggedInUser()->id));
+            $users = UsersHelper::getUsers(null, true);
+            $row = array_merge($me, $users);
         }
 
         if ( !isset($row) ) {
@@ -93,7 +100,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
                 $name = $name ? $name : "name=company_id";
                 $html = '
                     <select class="inputbox form-control" '.$name.' id="company_id">';
-                        $html .= "<option value='0' ".$selected.">Select company";
+                        $html .= "<option value='0' ".$selected.">" . TextHelper::_('COBALT_DROPDOWN_COMPANY_SELECT_COMPANY_OPTION_LABEL');
                         foreach ($row as $company => $info) {
                             $selected = ( $info['id'] == $selection ) ? "selected='selected'" : '';
                             $html .= '<option value="'.$info['id'].'" '.$selected.' >'.$info['name'].'</option>';
@@ -104,7 +111,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
                 $name = $name ? $name : "name=stage_id";
                 $html = '
                      <select class="inputbox form-control" '.$name.' id="stage_id">';
-                        $html .= "<option value='0' ".$selected.">Select stage";
+                        $html .= "<option value='0' ".$selected.">" . TextHelper::_('COBALT_DROPDOWN_STAGE_SELECT_STAGE_OPTION_LABEL');
                         foreach ($row as $stage => $info) {
                              $selected = ( $info['id'] == $selection ) ? "selected='selected'" : '';
                             $html .= '<option value="'.$info['id'].'" '.$selected.' '.$name.' >'.$info['name'].'</option>';
@@ -115,7 +122,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
             case "source":
                 $name = $name ? $name : "name=source_id";
                 $html = '<select class="inputbox form-control" '.$name.' id="source_id">';
-                        $html .= "<option value='0' ".$selected.">Select source";
+                        $html .= "<option value='0' ".$selected.">" . TextHelper::_('COBALT_DROPDOWN_SOURCE_SELECT_SOURCE_OPTION_LABEL');
                         if (count($row) > 0) {
                             foreach ($row as $source => $info) {
                                  $selected = ( $info['id'] == $selection ) ? "selected='selected'" : '';
@@ -128,7 +135,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
                 $name = $name ? $name : "name=probability";
                 $html = '
                     <select class="inputbox form-control" '.$name.' id="probability_id">';
-                        $html .= "<option value='0' ".$selected.">Select probability";
+                        $html .= "<option value='0' ".$selected.">" . TextHelper::_('COBALT_DROPDOWN_PROBABILITY_SELECT_PROBABILITY_OPTION_LABEL');
                         for ($i=5; $i<=95; $i+=5) {
                                 $selected = ( $i == $selection ) ? "selected='selected'" : '';
                                 $html .= '<option value="'.$i.'" '.$selected.' '.$name.' >'.$i.'%</option>';
@@ -139,7 +146,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
                 $name = $name ? $name : "name=status_id";
                 $html = '
                     <select class="inputbox form-control" '.$name.' id="status_id">';
-                    $html .= "<option value='0' ".$selected.">Select status...";
+                    $html .= "<option value='0' ".$selected.">" . TextHelper::_('COBALT_DROPDOWN_DEAL_STATUS_SELECT_STATUS_OPTION_LABEL');
                         foreach ($row as $status => $info) {
                              $selected = ( $info['id'] == $selection ) ? "selected='selected'" : '';
                             $html .= '<option value="'.$info['id'].'" '.$selected.' '.$name.' >'.$info['name'].'</option>';
@@ -151,7 +158,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
                 $name = $name ? $name : "name=status_id";
                 $html = '
                     <select class="inputbox form-control" '.$name.' id="status_id">';
-                    $html .= "<option value='0' ".$selected.">Select status...";
+                    $html .= "<option value='0' ".$selected.">" . TextHelper::_('COBALT_DROPDOWN_PEOPLE_STATUS_SELECT_STATUS_OPTION_LABEL');
                         foreach ($row as $status => $info) {
                              $selected = ( $info['id'] == $selection ) ? "selected='selected'" : '';
                             $html .= '<option value="'.$info['id'].'" '.$selected.' '.$name.' >'.$info['name'].'</option>';
@@ -163,10 +170,22 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
                 $name = $name ? $name : "name=deal_id";
                 $html = '
                     <select class="inputbox form-control" '.$name.' id="deal_id">';
-                    $html .= "<option value='0' ".$selected.">Select deal...";
+                    $html .= "<option value='0' ".$selected.">" . TextHelper::_('COBALT_DROPDOWN_DEAL_SELECT_DEAL_OPTION_LABEL');
                         foreach ($row as $deal => $info) {
                              $selected = ( $info['id'] == $selection ) ? "selected='selected'" : '';
                             $html .= '<option value="'.$info['id'].'" '.$selected.' '.$name.' >'.$info['name'].'</option>';
+                        }
+
+                    $html .='</select>';
+                break;
+            case "owner":
+                $name = $name ? $name : "name=owner_id";
+                $html = '
+                    <select class="inputbox form-control" '.$name.' id="owner_id">';
+                    $html .= "<option value=\"0\" ".$selected.">" . TextHelper::_('COBALT_DROPDOWN_OWNER_SELECT_OWNER_OPTION_LABEL');
+                        foreach ($row as $i => $info) {
+                             $selected = ( $info['value'] == $selection ) ? "selected='selected'" : '';
+                            $html .= '<option value="'.$info['value'].'" '.$selected.' '.$name.' >'.$info['label'].'</option>';
                         }
 
                     $html .='</select>';
@@ -204,7 +223,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
              $return = array();
 
             //grab db
-            $db = \Cobalt\Container::get('db');
+            $db = \Cobalt\Container::fetch('db');
 
             //generate query based on type
              $query = $db->getQuery(true);
@@ -248,7 +267,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
         public static function getCustomData($id,$type)
         {
             //get dbo
-            $db = \Cobalt\Container::get('db');
+            $db = \Cobalt\Container::fetch('db');
             $query = $db->getQuery(true);
 
             //query
@@ -275,7 +294,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
          */
         public static function getCustomValue($customType,$customNameOrId,$customValue,$itemId)
         {
-            $db = \Cobalt\Container::get('db');
+            $db = \Cobalt\Container::fetch('db');
             $query = $db->getQuery(true);
 
             $id = str_replace("custom_","",$customNameOrId);
@@ -326,7 +345,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
         public static function getLeaderBoards()
         {
             //load database
-            $db = \Cobalt\Container::get('db');
+            $db = \Cobalt\Container::fetch('db');
             $query = $db->getQuery(true);
 
             //load goals associate with user depending on team//role that have a leaderboard flag in the database
@@ -447,7 +466,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
         public static function getTeams($team=null)
         {
             //get database
-            $db = \Cobalt\Container::get('db');
+            $db = \Cobalt\Container::fetch('db');
             $query = $db->getQuery(true);
             //query string
             //u.id//
@@ -475,7 +494,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
         public static function getManagers($remove=null)
         {
             //get database
-            $db = \Cobalt\Container::get('db');
+            $db = \Cobalt\Container::fetch('db');
             $query = $db->getQuery(true);
             //query string
             $query->select("u.id,u.first_name,u.last_name,u.team_id");
@@ -561,7 +580,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
 
         }
 
-        public static function getFormTypes($selected="lead",$name="type",$class="class='inputbox'")
+        public static function getFormTypes($selected="lead",$name="type",$class="class='form-control'")
         {
             $import_types = array(
                 'lead'=>TextHelper::_('COBALT_LEAD'),
@@ -655,7 +674,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
 
          public static function generateDealStatuses($selected=null, $name="status_id", $class="class='inputbox form-control'")
          {
-            $db = \Cobalt\Container::get('db');
+            $db = \Cobalt\Container::fetch('db');
             $query = $db->getQuery(true);
             $query->select("id,name")->from("#__deal_status");
 

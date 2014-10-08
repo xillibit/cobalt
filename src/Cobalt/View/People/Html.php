@@ -11,7 +11,7 @@
 namespace Cobalt\View\People;
 
 use JUri;
-use RouteHelper;
+use Cobalt\Helper\RouteHelper;
 use JFactory;
 use Cobalt\Model\People as PeopleModel;
 use Cobalt\Model\Event as EventModel;
@@ -166,7 +166,7 @@ class Html extends AbstractHtmlView
             $model = new EventModel;
             $events = $model->getEvents("person",null,$app->input->get('id'));
             $this->event_dock = ViewHelper::getView('events','event_dock','phtml',array('events'=>$events));
-            $this->deal_dock = ViewHelper::getView('deals','deal_dock','phtml', array('deals'=>$person['deals']));
+            $this->deal_dock = ViewHelper::getView('deals','deal_dock','phtml', array('deals' => !empty($person['deals']) ? $person['deals'] : array() ));
 
             $this->document_list = ViewHelper::getView('documents','document_row','phtml', array('documents'=>$person['documents']));
             $this->custom_fields_view = ViewHelper::getView('custom','default','phtml',array('type'=>'people','item'=>$person));
@@ -177,6 +177,12 @@ class Html extends AbstractHtmlView
             $pagination = $model->getPagination();
             $this->people_list = ViewHelper::getView('people','list','phtml',array('people'=>$people,'total'=>$total,'pagination'=>$pagination));
             $this->people_filter = $state->get('Deal.people_name');
+            $this->dataTableColumns = $model->getDataTableColumns();
+            JFactory::getDocument()->addScriptDeclaration("
+            var loc = 'people';
+            var order_dir = '".$state->get('People.filter_order_Dir')."';
+            var order_col = '".$state->get('People.filter_order')."';
+            var dataTableColumns = " . json_encode($this->dataTableColumns) . ";");
         }
 
         if ($layout == "edit") {

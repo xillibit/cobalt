@@ -17,22 +17,22 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
 
  class CobaltHelper
  {
-    public static function percent2Color($value,$brightness = 255, $max = 100,$min = 0, $thirdColorHex = '00')
+    public static function percent2Color($value, $brightness = 255, $max = 100, $min = 0, $thirdColorHex = '00')
     {
         // Calculate first and second color (Inverse relationship)
         $value = number_format($value);
-        $first = (1-($value/$max))*$brightness;
-        $second = ($value/$max)*$brightness;
+        $first = (1 - ($value / $max)) * $brightness;
+        $second = ($value / $max) * $brightness;
 
         // Find the influence of the middle color (yellow if 1st and 2nd are red and green)
-        $diff = abs($first-$second);
-        $influence = ($brightness-$diff)/2;
+        $diff = abs($first - $second);
+        $influence = ($brightness - $diff) / 2;
         $first = intval($first + $influence);
         $second = intval($second + $influence);
 
         // Convert to HEX, format and return
-        $firstHex = str_pad(dechex($first),2,0,STR_PAD_LEFT);
-        $secondHex = str_pad(dechex($second),2,0,STR_PAD_LEFT);
+        $firstHex = str_pad(dechex($first), 2, 0, STR_PAD_LEFT);
+        $secondHex = str_pad(dechex($second), 2, 0, STR_PAD_LEFT);
 
         return $firstHex . $secondHex . $thirdColorHex ;
     }
@@ -43,9 +43,9 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
      * @param  [int]    $id   [Optional ID to get all events with a template]
      * @return [mixed]  $results
      */
-    public static function getTaskTemplates($type,$id=null)
+    public static function getTaskTemplates($type, $id = null)
     {
-        $db = \Cobalt\Container::get('db');
+        $db = \Cobalt\Container::fetch('db');
         $query = $db->getQuery(true);
         $query->select("t.*")->from("#__templates AS t")->where("t.type=".$db->quote($type));
         $db->setQuery($query);
@@ -77,7 +77,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
     public static function storeCustomCf($id,$cf_data,$type)
     {
         //Get DBO
-        $db = \Cobalt\Container::get('db');
+        $db = \Cobalt\Container::fetch('db');
         $query = $db->getQuery(true);
 
         //date generation
@@ -124,7 +124,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
 
     public static function checkEmailName($email)
     {
-        $db = \Cobalt\Container::get('db');
+        $db = \Cobalt\Container::fetch('db');
         $query = $db->getQuery(TRUE);
 
         $query->select("email")
@@ -179,13 +179,13 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
 
     public static function shareItem($itemId=null,$itemType=null,$userId=null)
     {
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
 
         $itemId = $itemId ? $itemId : $app->input->get('item_id');
         $itemType = $itemType ? $itemType : $app->input->get('item_type');
         $userId = $userId ? $userId : $app->input->get('user_id');
 
-        $db = \Cobalt\Container::get('db');
+        $db = \Cobalt\Container::fetch('db');
         $query = $db->getQuery(true);
 
         $query->insert("#__shared")
@@ -200,13 +200,13 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
 
     public static function unshareItem($itemId=null,$itemType=null,$userId=null)
     {
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
 
         $itemId = $itemId ? $itemId : $app->input->get('item_id');
         $itemType = $itemType ? $itemType : $app->input->get('item_type');
         $userId = $userId ? $userId : $app->input->get('user_id');
 
-        $db = \Cobalt\Container::get('db');
+        $db = \Cobalt\Container::fetch('db');
         $query = $db->getQuery(true);
 
         $query->delete("#__shared")
@@ -222,7 +222,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
 
     public static function showShareDialog()
     {
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
 
         $document = $app->getDocument();
         $document->addScriptDeclaration('var users='.json_encode(UsersHelper::getAllSharedUsers()).';');
@@ -234,7 +234,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
         $html .= '<div class="input-append">';
         $html .= '<input id="shared_user_name" class="inputbox" type="text" placeholder="'.TextHelper::_('COBALT_BEGIN_TYPING_USER').'" />';
         $html .= '<input type="hidden" name="shared_user_id" id="shared_user_id" />';
-        $html .= '<a class="btn btn-success" href="javascript:void(0);" onclick="shareItem();"><i class="icon-white icon-plus"></i>'.TextHelper::_('COBALT_ADD').'</a>';
+        $html .= '<a class="btn btn-success" href="javascript:void(0);" onclick="shareItem();"><i class="glyphicon glyphicon-plus icon-white"></i>'.TextHelper::_('COBALT_ADD').'</a>';
         $html .= '</div>';
         $html .= '<div id="shared_user_list">';
 
@@ -244,7 +244,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
         $users = UsersHelper::getItemSharedUsers($itemId,$itemType);
         if ( count ( $users ) > 0 ) {
             foreach ($users as $user) {
-                $html .= '<div id="shared_user_'.$user->value.'"><i class="icon-user"></i>'.$user->label." - <a class='btn btn-danger btn-mini' href='javascript:void(0);' onclick='unshareItem(".$user->value.");'>".TextHelper::_('COBALT_REMOVE')."</a></div>";
+                $html .= '<div id="shared_user_'.$user->value.'"><i class="glyphicon glyphicon-user"></i>'.$user->label." - <a class='btn btn-danger btn-mini' href='javascript:void(0);' onclick='unshareItem(".$user->value.");'>".TextHelper::_('COBALT_REMOVE')."</a></div>";
             }
         }
 
@@ -258,11 +258,11 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
 
     public static function getAssociationName($associationType=null,$associationId=null)
     {
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
         $associationType = $associationType ? $associationType : $app->input->get('association_type');
         $associationId = $associationId ? $associationId : $app->input->get('association_id');
 
-        $db = \Cobalt\Container::get('db');
+        $db = \Cobalt\Container::fetch('db');
         $query = $db->getQuery(true);
 
         switch ($associationType) {

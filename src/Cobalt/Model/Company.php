@@ -11,12 +11,15 @@
 namespace Cobalt\Model;
 
 use Cobalt\Table\CompanyTable;
+use Cobalt\Helper\RouteHelper;
 use Cobalt\Helper\DateHelper;
 use Cobalt\Helper\CobaltHelper;
 use Cobalt\Helper\ActivityHelper;
 use Cobalt\Helper\TweetsHelper;
 use Cobalt\Helper\UsersHelper;
+use Cobalt\Helper\TextHelper;
 use Cobalt\Helper\TemplateHelper;
+use Joomla\Registry\Registry;
 
 // no direct access
 defined( '_CEXEC' ) or die( 'Restricted access' );
@@ -37,7 +40,7 @@ class Company extends DefaultModel
     public function __construct()
     {
         parent::__construct();
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
         $this->_view = $app->input->get('view');
         $this->_layout = str_replace('_filter','',$app->input->get('layout'));
     }
@@ -47,16 +50,17 @@ class Company extends DefaultModel
      *
      * @return boolean True on success
      */
-    public function store($data=null)
+    public function store($data = null)
     {
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
 
         //Load Tables
-        $row = new CompanyTable;
-        $oldRow = new CompanyTable;
+        $row    = $this->getTable('Company');
+        $oldRow = $this->getTable('Company');
 
-        if ($data == null) {
-          $data = $app->input->getRequest('post');
+        if ($data == null)
+        {
+            $data = $this->app->input->post->getArray();
         }
 
         //date generation
@@ -85,27 +89,16 @@ class Company extends DefaultModel
         }
 
         // Bind the form fields to the table
-        if (!$row->bind($data)) {
-            $this->setError($this->db->getErrorMsg());
+	    try
+	    {
+		    $row->save($data);
+	    }
+	    catch (\Exception $exception)
+	    {
+		    $this->app->enqueueMessage($exception->getMessage(), 'error');
 
-            return false;
-        }
-
-        $app->triggerEvent('onBeforeCompanySave', array(&$row));
-
-        // Make sure the record is valid
-        if (!$row->check()) {
-            $this->setError($this->db->getErrorMsg());
-
-            return false;
-        }
-
-        // Store the web link table to the database
-        if (!$row->store()) {
-            $this->setError($this->db->getErrorMsg());
-
-            return false;
-        }
+		    return false;
+	    }
 
         $id = !empty($data['id']) ? $data['id'] : $this->db->insertId();
 
@@ -116,9 +109,9 @@ class Company extends DefaultModel
             CobaltHelper::storeCustomCf($id,$customArray,'company');
         }
 
-        $app->triggerEvent('onAfterCompanySave', array(&$row));
+        //$app->triggerEvent('onAfterCompanySave', array(&$row));
 
-        return $row;
+        return $row->id;
     }
 
     /**
@@ -126,9 +119,12 @@ class Company extends DefaultModel
      */
     public function _buildQuery()
     {
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
 
-        $this->db->setQuery("SET SQL_BIG_SELECTS=1")->execute();
+		if ($this->db->name=='mysqli')
+		{
+			$this->db->setQuery("SET SQL_BIG_SELECTS=1")->execute();
+		}
 
         $user = $this->_user;
         $team = $this->_team;
@@ -194,6 +190,8 @@ class Company extends DefaultModel
 
             //get current date
             $date = DateHelper::formatDBDate(date('Y-m-d 00:00:00'));
+
+            $type = $this->getState('Company.item_filter', $type);
 
             //filter for type
             if ($type != null && $type != "all") {
@@ -285,7 +283,7 @@ class Company extends DefaultModel
      */
     public function getCompanies($id = null, $type = null, $user = null, $team = null)
     {
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
         $this->_id = $id;
         $this->_type = $type;
         $this->_user = $user;
@@ -368,25 +366,32 @@ class Company extends DefaultModel
 
         }
 
-        $app->triggerEvent('onCompanyLoad',array(&$companies));
+        //$app->triggerEvent('onCompanyLoad',array(&$companies));
 
         return $companies;
     }
 
     public function getCompany($id = null)
     {
-        $app = \Cobalt\Container::get('app');
-        $id = $id ? $id : $app->input->get('id');
+        $app = \Cobalt\Container::fetch('app');
+        $id = $id ? $id : $app->input->getInt('id');
 
-        if ($id > 0) {
+        if ($id > 0)
+        {
             $company = $this->getCompanies($id);
-            if ( is_array($company) && count($company) >= 1 ) {
+
+            if ( is_array($company) && count($company) >= 1 )
+            {
                 return $company[0];
-            } else {
-                return (array) new CompanyTable;
             }
-        } else {
-            return (array) new CompanyTable;
+            else
+            {
+                return $this->getTable('Company');
+            }
+        }
+        else
+        {
+            return $this->getTable('Company');
         }
     }
 
@@ -453,7 +458,7 @@ class Company extends DefaultModel
     public function populateState()
     {
         //get states
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
 
         //determine view so we set correct states
         $view = $app->input->get('view');
@@ -465,8 +470,10 @@ class Company extends DefaultModel
         // In case limit has been changed, adjust it
         $limitstart = ($limit != 0 ? (floor($limitstart / $limit) * $limit) : 0);
 
-        $this->state->set($view.'_limit', $limit);
-        $this->state->set($view.'_limitstart', $limitstart);
+	    $state = new Registry;
+
+        $state->set($view.'_limit', $limit);
+        $state->set($view.'_limitstart', $limitstart);
 
         //set default filter states for reports
         $filter_order           = $app->getUserStateFromRequest('Company.filter_order','filter_order','c.name');
@@ -474,9 +481,111 @@ class Company extends DefaultModel
         $company_filter         = $app->getUserStateFromRequest('Company.'.$view.'_name','company_name',null);
 
         //set states for reports
-        $this->state->set('Company.filter_order', $filter_order);
-        $this->state->set('Company.filter_order_Dir', $filter_order_Dir);
-        $this->state->set('Company.'.$view.'_name', $company_filter);
+        $state->set('Company.filter_order', $filter_order);
+        $state->set('Company.filter_order_Dir', $filter_order_Dir);
+        $state->set('Company.'.$view.'_name', $company_filter);
+
+        // filters
+        $item_filter = $this->app->input->getString('item', null);
+        $state->set('Company.item_filter', $item_filter);
+
+	    $this->setState($state);
+    }
+
+    /**
+     * Describe and configure columns for jQuery dataTables here.
+     *
+     * 'data'       ... column id
+     * 'orderable'  ... if the column can be ordered by user or not
+     * 'ordering'   ... name of the column in SQL query with table prefix
+     * 'sClass'     ... CSS class applied to the column
+     * (other settings can be found at dataTable documentation)
+     *
+     * @return array
+     */
+    public function getDataTableColumns()
+    {
+        $columns = array();
+        $columns[] = array('data' => 'id', 'orderable' => false, 'sClass' => 'text-center');
+        $columns[] = array('data' => 'name', 'ordering' => 'c.name');
+        $columns[] = array('data' => 'contact_info', 'orderable' => false);
+        $columns[] = array('data' => 'created', 'ordering' => 'c.created');
+        $columns[] = array('data' => 'modified', 'ordering' => 'c.modified');
+        $columns[] = array('data' => 'action', 'orderable' => false);
+
+        return $columns;
+    }
+
+    /**
+     * Method transforms items to the format jQuery dataTables needs.
+     * Algorithm is available in parent method, just pass items array.
+     *
+     * @param   array of object of items from the database
+     * @return  array in format dataTables requires
+     */
+    public function getDataTableItems($items = array())
+    {
+        if (!$items)
+        {
+            $items = $this->getCompanies();
+        }
+
+        return parent::getDataTableItems($items);
+    }
+
+    /**
+     * Prepare HTML field templates for each dataTable column.
+     *
+     * @param   string column name
+     * @param   object of item
+     * @return  string HTML template for propper field
+     */
+    public function getDataTableFieldTemplate($column, $item)
+    {
+
+        switch ($column)
+        {
+            case 'id':
+                $template = '<input type="checkbox" class="export" name="ids[]" value="'.$item->id.'" />';
+                break;
+            case 'name':
+                $template = '<div class="title_holder">';
+                $template .= '<a href="'.RouteHelper::_('index.php?view=companies&layout=company&company_id='.$item->id).'">'.$item->name.'</a>';
+                $template .= '</div>';
+                if ($item->address_formatted != ''):
+                    $template .= '<address>'.$item->address_formatted.'</address>';
+                endif;
+                $template .= '<div class="hidden"><small>'.$item->description.'</small></div>';
+                break;
+            case 'contact_info':
+                $template = $item->phone.'<br>'.$item->email;
+                break;
+            case 'modified':
+                $template = DateHelper::formatDate($item->modified);
+                break;
+            case 'created':
+                $template = DateHelper::formatDate($item->created);
+                break;
+            case 'action':
+                $template = '<div class="btn-group">';
+                // @TODO: make these 2 buttons work
+                // $template .= ' <a rel="tooltip" title="'.TextHelper::_('COBALT_VIEW_CONTACTS').'" data-placement="bottom" class="btn" href="#" onclick="showCompanyContactsDialogModal('.$item->id.')"><i class="glyphicon glyphicon-user"></i></a>';
+                // $template .= ' <a rel="tooltip" title="'.TextHelper::_('COBALT_VIEW_NOTES').'" data-placement="bottom" class="btn" href="#" onclick="openNoteModal('.$item->id.',\'company\');"><i class="glyphicon glyphicon-file"></i></a>';
+                $template .= '</div>';
+                break;
+            default:
+                if (isset($column) && isset($item->{$column}))
+                {
+                    $template = $item->{$column};
+                }
+                else
+                {
+                    $template = '';
+                }
+                break;
+        }
+
+        return $template;
     }
 
 }

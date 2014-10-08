@@ -10,116 +10,151 @@
 // no direct access
 defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
 
-<script type="text/javascript">
-    var loc = "people";
-    order_url = "<?php echo 'index.php?view=people&layout=list&format=raw&tmpl=component'; ?>";
-    order_dir = "<?php echo $this->state->get('People.filter_order_Dir'); ?>";
-    order_col = "<?php echo $this->state->get('People.filter_order'); ?>";
-</script>
+<div class="page-header">
 
- <div data-remote="index.php?view=people&layout=edit&format=raw&tmpl=component" class="modal hide fade" id="personModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="myModalLabel"><?php echo ucwords(TextHelper::_('COBALT_ADD_PERSON')); ?></h3>
-        </div>
-        <div class="modal-body">
-            <p></p>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" data-dismiss="modal" aria-hidden="true"><?php echo ucwords(TextHelper::_('COBALT_CANCEL')); ?></button>
-            <button onclick="saveItem('edit_form')" class="btn btn-primary"><?php echo ucwords(TextHelper::_('COBALT_SAVE')); ?></button>
+    <div class="modal fade" id="personModal" tabindex="-1" role="dialog" aria-labelledby="personModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content"></div>
         </div>
     </div>
 
-<div class="page-header">
     <div class="btn-group pull-right">
-        <a rel="tooltip" title="<?php echo TextHelper::_('COBALT_PEOPLE_ADD'); ?>" data-placement="bottom" class="btn btn-success" role="button" href="#personModal" data-toggle="modal"><i class="icon-plus icon-white"></i></a>
-        <a rel="tooltip" title="<?php echo TextHelper::_('COBALT_IMPORT_PEOPLE'); ?>" data-placement="bottom"  class="btn btn-default" href="<?php echo RouteHelper::_('index.php?view=import&import_type=companies'); ?>"><i class="icon-circle-arrow-up"></i></a>
-        <?php if ( UsersHelper::canExport() ) { ?>
-        <a rel="tooltip" title="<?php echo TextHelper::_('COBALT_EXPORT_PEOPLE'); ?>" data-placement="bottom" class="btn btn-default" href="javascript:void(0)" onclick="exportCsv()"><i class="icon-share"></i></a>
-        <?php } ?>
+
+        <?php if ( UsersHelper::canExport() ): ?>
+            <button type="button" class="btn btn-default" href="<?php echo RouteHelper::_('index.php?view=people&layout=edit&format=raw&tmpl=component'); ?>" data-target="#personModal" data-toggle="modal"><i class="glyphicon glyphicon-plus icon-white"></i> <?php echo TextHelper::_('COBALT_PEOPLE_ADD'); ?></button>
+
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                <span class="caret"></span>
+                <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li>
+                    <a href="<?php echo RouteHelper::_('index.php?view=import&import_type=people'); ?>">
+                        <i class="glyphicon glyphicon-arrow-up"></i> <?php echo TextHelper::_('COBALT_IMPORT_PEOPLE'); ?>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" onclick="Cobalt.exportCSV()">
+                        <i class="glyphicon glyphicon glyphicon-arrow-down"></i> <?php echo TextHelper::_('COBALT_EXPORT_PEOPLE'); ?>
+                    </a>
+                </li>
+            </ul>
+        <?php else: ?>
+            <a rel="tooltip" title="<?php echo TextHelper::_('COBALT_PEOPLE_ADD'); ?>" data-placement="bottom" class="btn btn-default" role="button" href="<?php echo RouteHelper::_('index.php?view=people&layout=edit&format=raw&tmpl=component'); ?>" data-target="#personModal" data-toggle="modal"><i class="glyphicon glyphicon-plus icon-white"></i> <?php echo TextHelper::_('COBALT_PEOPLE_ADD'); ?></a>
+            <a rel="tooltip" title="<?php echo TextHelper::_('COBALT_IMPORT_PEOPLE'); ?>" data-placement="bottom"  class="btn btn-default" href="<?php echo RouteHelper::_('index.php?view=import&import_type=people'); ?>">
+                <i class="glyphicon glyphicon-arrow-up"></i>
+            </a>
+        <?php endif; ?>
+
     </div>
 
     <h1><?php echo ucwords(TextHelper::_('COBALT_PEOPLE_HEADER')); ?></h1>
 </div>
-<ul class="inline filter-sentence">
+<ul class="list-inline filter-sentence">
     <li><span><?php echo TextHelper::_('COBALT_SHOW'); ?></span></li>
     <li class="dropdown">
         <a class="dropdown-toggle update-toggle-text" data-toggle="dropdown" role="button" id="people_type_link" href="javascript:void(0);"><span class="dropdown-label"><?php echo $this->people_type_name; ?><span></a>
-        <ul class="dropdown-menu" role="menu" aria-labelledby="people_type_link">
-            <?php foreach ($this->people_types as $title => $text) {
-            echo "<li><a href='javascript:void(0);' class='filter_".$title."' onclick=\"companyType('".$title."')\">".$text."</a></li>";
-            }?>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="people_type_link" data-filter="item">
+            <?php foreach ($this->people_types as $title => $text) { ?>
+            <li>
+                <a href="#" class="filter_<?php echo $title; ?>" data-filter-value="<?php echo $title; ?>">
+                    <?php echo $text; ?>
+                </a>
+            </li>
+            <?php } ?>
         </ul>
     </li>
     <li><span><?php echo TextHelper::_('COBALT_OWNED_BY'); ?></span></li>
     <li class="dropdown">
-        <a class="dropdown-toggle update-toggle-text" href="javascript:void(0);" data-toggle="dropdown" role="button" id="people_user_link"><span class="dropdown-label"><?php echo $this->user_name; ?></span></a>
-        <ul class="dropdown-menu update-toggle-text" role="menu" aria-labelledby="people_user_link">
-            <li><a href="javascript:void(0);" class="filter_user_<?php echo $this->user_id; ?>" onclick="peopleUser(<?php echo $this->user_id; ?>,0)"><span class="dropdown-label"><?php echo TextHelper::_('COBALT_ME'); ?><span></a></li>
+        <a class="dropdown-toggle update-toggle-text" href="#" data-toggle="dropdown" role="button" id="people_user_link">
+            <span class="dropdown-label">
+                <?php echo $this->user_name; ?>
+            </span>
+        </a>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="people_user_link" data-filter="ownertype">
+            <li>
+                <a href="#" data-filter-value="member:<?php echo $this->user_id; ?>">
+                    <?php echo TextHelper::_('COBALT_ME'); ?>
+                </a>
+            </li>
             <?php if ($this->member_role != 'basic') { ?>
-                 <li><a href="javascript:void(0);" class="filter_user_all" onclick="peopleUser('all',0)"><?php echo TextHelper::_('COBALT_ALL_USERS'); ?></a></li>
+                 <li>
+                    <a href="#" data-filter-value="all">
+                        <?php echo TextHelper::_('COBALT_ALL_USERS'); ?>
+                    </a>
+                </li>
             <?php } ?>
             <?php
                 if ($this->member_role == 'exec') {
                     if ( count($this->teams) > 0 ) {
-                        foreach ($this->teams as $team) {
-                             echo "<li><a href='javascript:void(0);' class='filter_team_".$team['team_id']."' onclick='peopleUser(0,".$team['team_id'].")'>".$team['team_name'].TextHelper::_('COBALT_TEAM_APPEND')."</a></li>";
-                         }
+                        foreach ($this->teams as $team) { ?>
+                <li>
+                    <a href="#" data-filter-value="team:<?php echo $team['team_id']; ?>">
+                        <?php echo $team['team_name'].TextHelper::_('COBALT_TEAM_APPEND') ?>
+                    </a>
+                </li>";
+            <?php       }
                     }
                 }
                 if ( count($this->users) > 0 ) {
-                    foreach ($this->users as $user) {
-                        echo "<li><a href='javascript:void(0);' class='filter_user_".$user['id']."' onclick='peopleUser(".$user['id'].")'>".$user['first_name']."  ".$user['last_name']."</a></li>";
-                    }
+                    foreach ($this->users as $user) { ?>
+                <li>
+                    <a href="#" data-filter-value="member:<?php echo $user['id']; ?>">
+                    <?php echo $user['first_name']."  ".$user['last_name'] ?>
+                    </a>
+                </li>
+            <?php   }
                 }
             ?>
         </ul>
     </li>
     <li><span><?php echo TextHelper::_('COBALT_WHO'); ?></span></li>
     <li class="dropdown">
-        <a class="dropdown-toggle update-toggle-text" href="javascript:void(0);" data-toggle="dropdown" role="button" id="people_stages_link"><span class="dropdown-label"><?php echo $this->stages_name; ?></span></a>
-        <ul class="dropdown-menu" role="menu" aria-labelledby="people_stages_link">
-            <?php foreach ($this->stages as $title => $text) {
-                echo "<li><a href='javascript:void(0);' class='filter_".$title."' onclick=\"peopleUpdated('".$title."')\">".$text."</a></li>";
-            }?>
+        <a class="dropdown-toggle update-toggle-text" href="#" data-toggle="dropdown" role="button" id="people_stages_link">
+            <span class="dropdown-label"><?php echo $this->stages_name; ?></span>
+        </a>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="people_stages_link" data-filter="stage">
+            <?php foreach ($this->stages as $title => $text) { ?>
+            <li>
+                <a href="#" data-filter-value="<?php echo $title; ?>"><?php echo $text ?></a>
+            </li>
+            <?php } ?>
         </ul>
     </li>
     <li><span><?php echo TextHelper::_('COBALT_AND_WITH_STATUS'); ?></span></li>
     <li class="dropdown">
         <a class="update-toggle-text dropdown-toggle" href="javascript:void(0);" data-toggle="dropdown" role="button" id="people_status_link"><span class="dropdown-label"><?php echo $this->status_name; ?></span></a>
-        <ul class="dropdown-menu" role="menu" aria-labelledby="people_status_link">
-            <li><a class="filter_any" onclick="peopleStatus('any')"><?php echo TextHelper::_('COBALT_ANY_STATUS'); ?></a></li>
-            <?php
-                foreach ($this->status_list as $key => $status) {
-                    echo "<li><a href='javascript:void(0);' class='filter_".$status['id']."' onclick='peopleStatus(".$status['id'].")'>".$status['name']."</a></li>";
-                }
-            ?>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="people_status_link" data-filter="status">
+            <li>
+                <a class="filter_any">
+                    <?php echo TextHelper::_('COBALT_ANY_STATUS'); ?>
+                </a>
+            </li>
+            <?php foreach ($this->status_list as $key => $status) { ?>
+            <li>
+                <a href="#" data-filter-value="<?php echo $status['id']; ?>">
+                    <?php echo $status['name']; ?>
+                </a>
+            </li>
+            <?php } ?>
         </ul>
     </li>
     <li>
         <span><?php echo TextHelper::_('COBALT_NAMED'); ?></span>
-        <input class="inputbox filter_input" name="name" type="text" placeholder="<?php echo TextHelper::_('COBALT_ANYTHING'); ?>" value="<?php echo $this->people_filter; ?>">
+    </li>
+    <li>
+        <input class="form-control filter_input datatable-searchbox" name="person_name" type="text" placeholder="<?php echo TextHelper::_('COBALT_ANYTHING'); ?>" value="<?php echo $this->people_filter; ?>">
     </li>
     <li class="filter_sentence">
         <div class="ajax_loader"></div>
     </li>
 </ul>
-<small><span id="people_matched"></span> <?php echo TextHelper::_('COBALT_PEOPLE_MATCHED'); ?> <?php echo TextHelper::_('COBALT_THERE_ARE'); ?> <?php echo $this->totalPeople; ?> <?php echo TextHelper::_('COBALT_PEOPLE_IN_ACCOUNT'); ?></small>
 
 <?php echo TemplateHelper::getListEditActions(); ?>
 <form method="post" id="list_form" action="<?php echo RouteHelper::_('index.php?view=people'); ?>">
-<table class="table table-striped table-hover" id="people">
-          <?php echo $this->people_list->render(); ?>
-</table>
-<input type="hidden" name="list_type" value="people" />
+    <table class="table table-striped table-hover data-table table-bordered" id="people">
+        <?php echo $this->people_list->render(); ?>
+    </table>
+    <input type="hidden" name="list_type" value="people" />
 </form>
-<?php /*
-<div id="templates" style="display:none;">
-    <div id="edit_task" style="display:none;"></div>
-    <div id="note_modal" style="display:none;"></div>
-    <div id="edit_event" style="display:none;"></div>
-    <div id="edit_button"><a class="edit_button_link" id="edit_button_link" href="javascript:void(0)"></a></div>
-    <div id="edit_list_modal" style="display:none;" ></div>
-</div>
-*/
+

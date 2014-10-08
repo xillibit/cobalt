@@ -55,7 +55,7 @@ abstract class ToolbarHelper
 
         $html = '<div class="pagetitle ' . htmlspecialchars(implode(' ', $icons)) . '"><h2>' . $title . '</h2></div>';
 
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
         $app->JComponentTitle = $html;
     }
 
@@ -574,7 +574,7 @@ abstract class ToolbarHelper
      * @param int    $height    The height of the popup. [UNUSED]
      * @param int    $width     The width of the popup. [UNUSED]
      * @param string $alt       The name of the button.
-     * @param string $path      An alternative path for the configuation xml relative to JPATH_SITE.
+     * @param string $path      An alternative path for the configuation xml relative to JPATH_ROOT.
      *
      * @return void
      *

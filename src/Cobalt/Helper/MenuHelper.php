@@ -11,7 +11,6 @@
 namespace Cobalt\Helper;
 
 use JFactory;
-use RouteHelper;
 
 // no direct access
 defined( '_CEXEC' ) or die( 'Restricted access' );
@@ -34,10 +33,10 @@ class MenuHelper
 
     public static function getMenuLinks()
     {
-        return array(
+        $menuItems = array(
             array(
                 'link'   => RouteHelper::_('index.php?view=cobalt'),
-                'class' => 'icon-home',
+                'class' => 'glyphicon glyphicon-home',
                 'text' => TextHelper::_('Cobalt Dashboard'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_DASHBOARD_MENU_TOOLTIP'),
@@ -46,25 +45,26 @@ class MenuHelper
             ),
             array(
                 'link' => RouteHelper::_('index.php?view=users'),
-                'class' => 'icon-user',
+                'class' => 'glyphicon glyphicon-user',
                 'text' => TextHelper::_('Users'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_USERS_MENU_TOOLTIP'),
                 'id'        => "user_menu_link",
                 'view'      => "users"
             ),
-            array(
-                'link' => RouteHelper::_('index.php?view=branding'),
-                'class' => 'icon-tint',
-                'text' => TextHelper::_('Colors and Branding'),
-                'access' => array( ),
-                'tooltip'   => TextHelper::_('COBALT_COLORS_MENU_TOOLTIP'),
-                'id'        => "colors_menu_link",
-                'view'      => "branding"
-            ),
+            // @TODO: make this config
+            // array(
+            //     'link' => RouteHelper::_('index.php?view=branding'),
+            //     'class' => 'glyphicon glyphicon-tint',
+            //     'text' => TextHelper::_('Colors and Branding'),
+            //     'access' => array( ),
+            //     'tooltip'   => TextHelper::_('COBALT_COLORS_MENU_TOOLTIP'),
+            //     'id'        => "colors_menu_link",
+            //     'view'      => "branding"
+            // ),
             array(
                 'link' => RouteHelper::_('index.php?view=stages'),
-                'class' => 'icon-tasks',
+                'class' => 'glyphicon glyphicon-tasks',
                 'text' => TextHelper::_('Deal Stages'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_STAGES_MENU_TOOLTIP'),
@@ -73,7 +73,7 @@ class MenuHelper
             ),
             array(
                 'link' => RouteHelper::_('index.php?view=categories'),
-                'class' => 'icon-th-list',
+                'class' => 'glyphicon glyphicon-th-list',
                 'text' => TextHelper::_('Note Categories'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_NOTES_MENU_TOOLTIP'),
@@ -82,7 +82,7 @@ class MenuHelper
             ),
             array(
                 'link' => RouteHelper::_('index.php?view=sources'),
-                'class' => 'icon-random',
+                'class' => 'glyphicon glyphicon-random',
                 'text' => TextHelper::_('Sources'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_SOURCES_MENU_TOOLTIP'),
@@ -91,7 +91,7 @@ class MenuHelper
             ),
             array(
                 'link' => RouteHelper::_('index.php?view=companycustom'),
-                'class' => 'icon-edit',
+                'class' => 'glyphicon glyphicon-edit',
                 'text' => TextHelper::_('Company Custom Fields'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_CUSTOM_MENU_TOOLTIP'),
@@ -100,7 +100,7 @@ class MenuHelper
             ),
             array(
                 'link' => RouteHelper::_('index.php?view=peoplecustom'),
-                'class' => 'icon-edit',
+                'class' => 'glyphicon glyphicon-edit',
                 'text' => TextHelper::_('People Custom Fields'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_CUSTOM_MENU_TOOLTIP'),
@@ -109,7 +109,7 @@ class MenuHelper
             ),
             array(
                 'link' => RouteHelper::_('index.php?view=dealcustom'),
-                'class' => 'icon-edit',
+                'class' => 'glyphicon glyphicon-edit',
                 'text' => TextHelper::_('Deal Custom Fields'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_CUSTOM_MENU_TOOLTIP'),
@@ -118,7 +118,7 @@ class MenuHelper
             ),
             array(
                 'link' => RouteHelper::_('index.php?view=statuses'),
-                'class' => 'icon-thumbs-up',
+                'class' => 'glyphicon glyphicon-thumbs-up',
                 'text' => TextHelper::_('People Statuses'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_STATUSES_MENU_TOOLTIP'),
@@ -127,7 +127,7 @@ class MenuHelper
             ),
             array(
                 'link' => RouteHelper::_('index.php?view=templates'),
-                'class' => 'icon-filter',
+                'class' => 'glyphicon glyphicon-filter',
                 'text' => TextHelper::_('Workflow'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_WORKFLOW_MENU_TOOLTIP'),
@@ -136,7 +136,7 @@ class MenuHelper
             ),
             array(
                 'link' => RouteHelper::_('index.php?view=admindocuments'),
-                'class' => 'icon-folder-open',
+                'class' => 'glyphicon glyphicon-folder-open',
                 'text' => TextHelper::_('Shared Documents'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_DOCUMENTS_MENU_TOOLTIP'),
@@ -145,25 +145,26 @@ class MenuHelper
             ),
             array(
                 'link' => RouteHelper::_('index.php?view=menu'),
-                'class' => 'icon-align-justify',
+                'class' => 'glyphicon glyphicon-align-justify',
                 'text' => TextHelper::_('Menu'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_MENU_MENU_TOOLTIP'),
                 'id'        => "menu_menu_link",
                 'view'      => "menu"
             ),
-             array(
-                'link' => RouteHelper::_('index.php?view=adminimport'),
-                'class' => 'icon-upload',
-                'text' => TextHelper::_('Import'),
-                'access' => array( ),
-                'tooltip'   => TextHelper::_('COBALT_CONFIG_IMPORT_TOOLTIP'),
-                'id'        => "adminimport_menu_link",
-                'view'      => "adminimport"
-            ),
+            // TODO: Remove Admin Import Menu and Layouts
+            //  array(
+            //     'link' => RouteHelper::_('index.php?view=adminimport'),
+            //     'class' => 'glyphicon glyphicon-upload',
+            //     'text' => TextHelper::_('Import'),
+            //     'access' => array( ),
+            //     'tooltip'   => TextHelper::_('COBALT_CONFIG_IMPORT_TOOLTIP'),
+            //     'id'        => "adminimport_menu_link",
+            //     'view'      => "adminimport"
+            // ),
              array(
                 'link' => RouteHelper::_('index.php?view=formwizard'),
-                'class' => 'icon-star-empty',
+                'class' => 'glyphicon glyphicon-star-empty',
                 'text' => TextHelper::_('Form Wizard'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_FORMWIZARD_TOOLTIP'),
@@ -172,7 +173,7 @@ class MenuHelper
             ),
             array(
                 'link' => RouteHelper::_('index.php?view=config'),
-                'class' => 'icon-cog',
+                'class' => 'glyphicon glyphicon-cog',
                 'text' => TextHelper::_('Settings'),
                 'access' => array( ),
                 'tooltip'   => TextHelper::_('COBALT_CONFIG_MENU_TOOLTIP'),
@@ -180,6 +181,28 @@ class MenuHelper
                 'view'      => "config"
             )
         );
+
+        return self::setActive($menuItems);
+    }
+
+    public static function setActive($menuItems)
+    {
+        $app = \Cobalt\Container::fetch('app');
+        $view = $app->input->getCmd('view', 'cobalt');
+
+        foreach ($menuItems as &$item)
+        {
+            if ($item['view'] == $view)
+            {
+                $item['active'] = true;
+            }
+            else
+            {
+                $item['active'] = false;
+            }
+        }
+
+        return $menuItems;
     }
 
     public static function getQuickMenuLinks()
@@ -187,55 +210,55 @@ class MenuHelper
         return array(
             array(
                 'link' => RouteHelper::_('index.php?controller=users&task=add'),
-                'class' => 'icon-user',
+                'class' => 'glyphicon glyphicon-user',
                 'text' => TextHelper::_('COBALT_ADD_NEW_USER'),
                 'access' => array( )
             ),
             array(
                 'link' => RouteHelper::_('index.php?controller=stages&task=add'),
-                'class' => 'icon-tasks',
+                'class' => 'glyphicon glyphicon-tasks',
                 'text' => TextHelper::_('COBALT_ADD_NEW_DEAL_STAGE'),
                 'access' => array( )
             ),
             array(
                 'link' => RouteHelper::_('index.php?controller=categories&task=add'),
-                'class' => 'icon-th-list',
+                'class' => 'glyphicon glyphicon-th-list',
                 'text' => TextHelper::_('COBALT_ADD_NEW_NOTE_CATEGORY'),
                 'access' => array( )
             ),
             array(
                 'link' => RouteHelper::_('index.php?controller=sources&task=add'),
-                'class' => 'icon-random',
+                'class' => 'glyphicon glyphicon-random',
                 'text' => TextHelper::_('COBALT_ADD_NEW_SOURCE'),
                 'access' => array( )
             ),
             array(
                 'link' => RouteHelper::_('index.php?controller=companycustom&task=add'),
-                'class' => 'icon-edit',
+                'class' => 'glyphicon glyphicon-edit',
                 'text' => TextHelper::_('COBALT_ADD_NEW_COMPANY_CUSTOM_FIELD'),
                 'access' => array( )
             ),
             array(
                 'link' => RouteHelper::_('index.php?controller=peoplecustom&task=add'),
-                'class' => 'icon-edit',
+                'class' => 'glyphicon glyphicon-edit',
                 'text' => TextHelper::_('COBALT_ADD_NEW_PEOPLE_CUSTOM_FIELD'),
                 'access' => array( )
             ),
             array(
                 'link' => RouteHelper::_('index.php?controller=dealcustom&task=add'),
-                'class' => 'icon-edit',
+                'class' => 'glyphicon glyphicon-edit',
                 'text' => TextHelper::_('COBALT_ADD_NEW_DEAL_CUSTOM_FIELD'),
                 'access' => array( )
             ),
             array(
                 'link' => RouteHelper::_('index.php?controller=statuses&task=add'),
-                'class' => 'icon-thumbs-up',
+                'class' => 'glyphicon glyphicon-thumbs-up',
                 'text' => TextHelper::_('COBALT_ADD_NEW_PERSON_STATUS'),
                 'access' => array( )
             ),
             array(
                 'link' => RouteHelper::_('index.php?controller=templates&task=add'),
-                'class' => 'icon-filter',
+                'class' => 'glyphicon glyphicon-filter',
                 'text' => TextHelper::_('COBALT_CREATE_NEW_WORKFLOW'),
                 'access' => array( )
             )
@@ -247,7 +270,7 @@ public static function getHelpMenuLinks()
     $types = array(
              array(
                 'link' => 'index.php?view=users&layout=edit&show_fields=id',
-                'class' => 'icon-user',
+                'class' => 'glyphicon glyphicon-user',
                 'text' => TextHelper::_('COBALT_CREATE_NEW_USERS_HELP'),
                 'access' => array( ),
                 'config' => 'users_add',
@@ -255,7 +278,7 @@ public static function getHelpMenuLinks()
             ),
              array(
                 'link' => 'index.php?view=config&layout=default&show_fields=timezone',
-                'class' => 'icon-cog',
+                'class' => 'glyphicon glyphicon-cog',
                 'text' => TextHelper::_('COBALT_CREATE_LOCALE_HELP'),
                 'access' => array( ),
                 'config' => 'config_default',
@@ -263,7 +286,7 @@ public static function getHelpMenuLinks()
             ),
              array(
                 'link' => 'index.php?view=templates&layout=edit&show_fields=name',
-                'class' => 'icon-filter',
+                'class' => 'glyphicon glyphicon-filter',
                 'text' => TextHelper::_('COBALT_CREATE_WORKFLOWS_HELP'),
                 'access' => array( ),
                 'config' => 'templates_edit',
@@ -271,7 +294,7 @@ public static function getHelpMenuLinks()
             ),
              array(
                 'link' => 'index.php?view=menu&layout=default&show_fields=header',
-                'class' => 'icon-align-justify',
+                'class' => 'glyphicon glyphicon-align-justify',
                 'text' => TextHelper::_('COBALT_CREATE_MENU_ITEMS_HELP'),
                 'access' => array( ),
                 'config' => 'menu_default',
@@ -279,7 +302,7 @@ public static function getHelpMenuLinks()
             ),
              array(
                 'link' => 'index.php?view=adminimport&layout=default&tab=sample',
-                'class' => 'icon-list-alt',
+                'class' => 'glyphicon glyphicon-list-alt',
                 'text' => TextHelper::_('COBALT_CREATE_INSTALL_SAMPLE'),
                 'access' => array( ),
                 'config' => 'import_sample',
@@ -287,7 +310,7 @@ public static function getHelpMenuLinks()
             ),
              array(
                 'link' => 'index.php?view=adminimport&layout=default',
-                'class' => 'icon-share',
+                'class' => 'glyphicon glyphicon-share',
                 'text' => TextHelper::_('COBALT_CREATE_IMPORT_HELP'),
                 'access' => array( ),
                 'config' => 'import_default',
@@ -295,7 +318,7 @@ public static function getHelpMenuLinks()
             ),
              array(
                 'link' => 'index.php?view=launch&layout=default',
-                'class' => 'icon-arrow-right',
+                'class' => 'glyphicon glyphicon-arrow-right',
                 'text' => TextHelper::_('COBALT_CREATE_LAUNCH_HELP'),
                 'access' => array( ),
                 'config' => 'launch_default',
@@ -311,7 +334,7 @@ public static function getHelpMenuLinks()
     {
         $modules = array();
 
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
 
         /** Side menu links **/
         $menu_links = MenuHelper::getMenuLinks();
@@ -356,17 +379,6 @@ public static function getHelpMenuLinks()
             }
         }
         $modules['percentage'] = number_format(($completed/$count)*100,0) ;
-
-        /** Auto show input tooltips **/
-        $input_fields = explode(',',$app->input->get('show_fields'));
-        if ( count ( $input_fields ) > 0 ) {
-            $document = $app->getDocument();
-            foreach ($input_fields as $input_field) {
-                $document->addScriptDeclaration(
-                        "$(document).ready(function(){showTooltip('".$input_field."');});"
-                    );
-            }
-        }
 
         return $modules;
 

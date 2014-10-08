@@ -21,25 +21,26 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
 <iframe name="hidden" style="display:none;width:0px;height:0px;border:0px;"></iframe>
 
 <div class="row-fluid">
-    <div class="span4">
-        <ul class="dash_float_list unstyled" id="dash_floats_left">
+    <div class="col-md-4">
+        <ul class="dash_float_list list-unstyled" id="dash_floats_left">
             <li class="widget">
                 <div class="dash_float" id="com_cobalt_tasks_events">
                         <?php echo $this->eventDock->render(); ?>
                 </div>
            </li>
            <li class="widget">
-                <div class="dash_float" id="deals_container">
-                    <div class="dash_float_header">
-                        <h3><?php echo ucwords(TextHelper::_('COBALT_RECENT_DEALS')); ?></h3>
+                <div class="panel panel-default" id="deals_container">
+                    <div class="panel-heading">
+                        <h4 class="panel-title"><?php echo ucwords(TextHelper::_('COBALT_RECENT_DEALS')); ?></h4>
                     </div>
-                    <div id="deals">
                         <table class="table table-striped table-hover table-bordered" id="deal_list">
-                            <tr>
-                                <th><?php echo TextHelper::_('COBALT_DEAL_NAME'); ?></th>
-                                <th><?php echo TextHelper::_('COBALT_DEAL_STATUS'); ?></th>
-                                <th class="right"><?php echo TextHelper::_('COBALT_DEAL_AMOUNT'); ?></th>
-                            </tr>
+                            <thead>
+                                <tr>
+                                    <th><?php echo TextHelper::_('COBALT_DEAL_NAME'); ?></th>
+                                    <th><?php echo TextHelper::_('COBALT_DEAL_STATUS'); ?></th>
+                                    <th class="right"><?php echo TextHelper::_('COBALT_DEAL_AMOUNT'); ?></th>
+                                </tr>
+                            </thead>
                             <?php $i = 0; ?>
                             <?php foreach ($this->recentDeals as $deal) : ?>
                                 <?php $k = $i%2; ?>
@@ -55,23 +56,58 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
                                 <?php $i++; ?>
                             <?php endforeach; ?>
                         </table>
-                    </div>
                 </div>
             </li>
        </ul>
     </div>
-    <div class="span8">
-        <ul class="dash_float_list unstyled" id="dash_floats_right">
+    <div class="col-md-8">
+        <ul class="dash_float_list list-unstyled" id="dash_floats_right">
             <li class="widget">
                 <div class="dash_float" id="sales_container">
                     <div class="dash_float_header">
-                        <div class="btn-group pull-right">
-                            <a class="btn" id="chart_select_prev"><i class="icon-chevron-left"></i></a><a class="btn" id="chart_select_next"><i class="icon-chevron-right"></i></a>
-                        </div>
                         <h3><?php echo TextHelper::_('COBALT_SALES_HEADER'); ?></h3>
                     </div>
                     <div id="sales_graphs_container">
-                        <div id="sales_graphs"></div>
+                        <div id="carousel-example-generic" class="carousel slide text-center" data-ride="carousel">
+
+                            <!-- Indicators -->
+                            <ol class="carousel-indicators">
+                                <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
+                                <li data-target="#carousel-example-generic" data-slide-to="1"></li>
+                                <li data-target="#carousel-example-generic" data-slide-to="2"></li>
+                            </ol>
+
+                            <!-- Wrapper for slides -->
+                            <div class="carousel-inner">
+                                <div class="item active">
+                                    <canvas id="dealsByStagePie" width="350" height="350"></canvas>
+                                    <div class="carousel-caption">
+                                        <?php echo TextHelper::_('COBALT_DEALS_BY_STAGE_PIE_CHART'); ?>
+                                    </div>
+                                </div>
+                                <div class="item">
+                                    <canvas id="dealsByStatusPie" width="350" height="350"></canvas>
+                                    <div class="carousel-caption">
+                                        <?php echo TextHelper::_('COBALT_DEALS_BY_STATUS_PIE_CHART'); ?>
+                                    </div>
+                                </div>
+                                <div class="item">
+                                    <canvas id="monthlyRevenue" width="550" height="350"></canvas>
+                                    <div class="carousel-caption">
+                                        <?php echo TextHelper::_('COBALT_REVENUE_THIS_MONTH'); ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Controls -->
+                            <a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">
+                                <span class="glyphicon glyphicon-chevron-left"></span>
+                            </a>
+                            <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
+                                <span class="glyphicon glyphicon-chevron-right"></span>
+                            </a>
+
+                        </div>
                     </div>
                 </div>
            </li>

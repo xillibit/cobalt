@@ -9,11 +9,13 @@
 -------------------------------------------------------------------------*/
 // no direct access
 defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
-
+<script>
+    loc = 'documents';
+</script>
 <div class="page-header">
     <h1><?php echo TextHelper::_('COBALT_EDIT_DOCUMENTS'); ?></h1>
 </div>
-<ul class="inline filter-sentence">
+<ul class="list-inline filter-sentence">
     <li><span><?php echo TextHelper::_('COBALT_SHOW'); ?></span></li>
     <li class="dropdown">
         <a class="dropdown-toggle update-toggle-text" href="javascript:void(0);" data-toggle="dropdown" role="button" href="javascript:void(0);" id="document_assoc_link"><span class="dropdown-label"><?php echo $this->assoc_name; ?></span></a>
@@ -56,8 +58,10 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
         </ul>
     </li>
     <li>
-        <span><?php echo TextHelper::_('COBALT_NAMED'); ?></span>
-        <input type="text" class="inputbox" placeholder="<?php echo TextHelper::_('COBALT_ANYTHING'); ?>" value="" name="document_name_search" />
+        <?php echo TextHelper::_('COBALT_NAMED'); ?>
+    </li>
+    <li>
+        <input type="text" class="form-control filter_input datatable-searchbox" placeholder="<?php echo TextHelper::_('COBALT_ANYTHING'); ?>" value="" name="document_name_search" />
     </li>
     <li>
         <div class="ajax_loader"></div>
@@ -67,7 +71,10 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
 <small>
     <span id="documents_matched"></span> <?php echo TextHelper::_('COBALT_DOCUMENT_MATCHES'); ?>. <?php echo TextHelper::_('COBALT_DOCUMENT_THERE_ARE'); ?> <span id="documents_total"><?php echo DocumentHelper::getTotalDocuments(); ?></span> <?php echo TextHelper::_('COBALT_DOCUMENT_IN_YOUR_ACCOUNT'); ?>.
 </small>
-
-<table class="table table-striped table-hover">
-    <?php echo $this->document_list->render(); ?>
-</table>
+<?php echo TemplateHelper::getListEditActions(); ?>
+<form method="post" id="list_form" action="<?php echo RouteHelper::_('index.php?view=documents'); ?>">
+    <table class="table table-hover table-striped data-table table-bordered dataTable no-footer" id="documents">
+        <?php echo $this->document_list->render(); ?>
+    </table>
+    <input type="hidden" name="list_type" value="documents" />
+</form>

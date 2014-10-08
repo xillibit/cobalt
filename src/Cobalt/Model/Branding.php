@@ -23,8 +23,8 @@ class Branding extends DefaultModel
     public function store()
     {
         //Load Tables
-        $app = \Cobalt\Container::get('app');
-        $row = new BrandingTable;
+        $app = \Cobalt\Container::fetch('app');
+        $row = $this->getTable('Branding');
         $data = $app->input->getRequest('post');
 
         //date generation
@@ -74,7 +74,7 @@ class Branding extends DefaultModel
             //$fileName = preg_replace("[^A-Za-z0-9.]", "-", $fileName);
 
             //always use constants when making file paths, to avoid the possibilty of remote file inclusion
-            $uploadPath = JPATH_SITE.'/libraries/crm/media/logos/'.$hashFilename;
+            $uploadPath = JPATH_ROOT.'/src/Cobalt/media/logos/'.$hashFilename;
 
             if (!File::upload($fileTemp, $uploadPath)) {
                 echo TextHelper::_( 'ERROR MOVING FILE' );
@@ -89,25 +89,16 @@ class Branding extends DefaultModel
         }
 
         // Bind the form fields to the table
-        if (!$row->bind($data)) {
-            $this->setError($this->db->getErrorMsg());
+	    try
+	    {
+		    $row->save($data);
+	    }
+	    catch (\Exception $exception)
+	    {
+		    $this->app->enqueueMessage($exception->getMessage(), 'error');
 
-            return false;
-        }
-
-        // Make sure the record is valid
-        if (!$row->check()) {
-            $this->setError($this->db->getErrorMsg());
-
-            return false;
-        }
-
-        // Store the web link table to the database
-        if (!$row->store()) {
-            $this->setError($this->db->getErrorMsg());
-
-            return false;
-        }
+		    return false;
+	    }
 
         return true;
     }

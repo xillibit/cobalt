@@ -10,8 +10,10 @@
 
 namespace Cobalt\Model;
 
+use Cobalt\Helper\DateHelper;
+use Cobalt\Helper\RouteHelper;
 use Cobalt\Table\StatusesTable;
-use JFactory;
+
 use Joomla\Registry\Registry;
 
 // no direct access
@@ -19,135 +21,208 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
 
 class Statuses extends DefaultModel
 {
-    public $id = null;
-    public $_view = "statuses";
 
-    public function store()
-    {
-        $app = \Cobalt\Container::get('app');
+	public $id = null;
 
-        //Load Tables
-        $row = new StatusesTable;
-        $data = $app->input->getRequest( 'post' );
+	public $_view = "statuses";
 
-        //date generation
-        $date = date('Y-m-d H:i:s');
+	public function store()
+	{
+		// Load Tables
+		$row  = $this->getTable('Statuses');
+		$data = $this->app->input->post->getArray();
 
-        if ( !array_key_exists('id',$data) ) {
-            $data['created'] = $date;
-        }
+		// Date generation
+		$date = DateHelper::formatDBDate('now');
 
-        $data['modified'] = $date;
-        $data['color'] = str_replace("#","",$data['color']);
+		if (!array_key_exists('id', $data))
+		{
+			$data['created'] = $date;
+		}
 
-        // Bind the form fields to the table
-        if (!$row->bind($data)) {
-            $this->setError($this->db->getErrorMsg());
+		$data['modified'] = $date;
+		$data['color']	= str_replace("#", "", $data['color']);
 
-            return false;
-        }
+		// Bind the form fields to the table
+		try
+		{
+			$row->save($data);
+		}
+		catch (\InvalidArgumentException $exception)
+		{
+			$this->app->enqueueMessage($exception->getMessage(), 'error');
 
-        // Make sure the record is valid
-        if (!$row->check()) {
-            $this->setError($this->db->getErrorMsg());
+			return false;
+		}
 
-            return false;
-        }
+		return true;
+	}
 
-        // Store the web link table to the database
-        if (!$row->store()) {
-            $this->setError($this->db->getErrorMsg());
+	public function _buildQuery()
+	{
+		$query = $this->db->getQuery(true);
 
-            return false;
-        }
+		return $query->select('s.*')
+			->from('#__people_status AS s')
+			->order($this->getState()->get('Statuses.filter_order') . ' ' . $this->getState()->get('Statuses.filter_order_Dir'));
+	}
 
-        return true;
-    }
+	/**
+	 * Get list of stages
+	 *
+	 * @param  int $id specific search id
+	 *
+	 * @return mixed $results results
+	 */
+	public function getStatuses($id = null)
+	{
+		$query = $this->_buildQuery();
 
-    public function _buildQuery()
-    {
-        //database
-        $db = JFactory::getDBO();
-        $query = $db->getQuery(true);
+		/** ------------------------------------------
+		 * Set query limits/ordering and load results
+		 */
+		$limit = $this->getState($this->_view . '_limit');
+		$limitStart = $this->getState($this->_view . '_limitstart');
 
-        //query
-        $query->select("s.*");
-        $query->from("#__people_status AS s");
+		if ($limit != 0)
+		{
+			$query->order($this->getState('Statuses.filter_order') . ' ' . $this->getState('Statuses.filter_order_Dir'));
 
-        //sort
-        $query->order($this->getState('Statuses.filter_order') . ' ' . $this->getState('Statuses.filter_order_Dir'));
+			if ($limitStart >= $this->getTotal())
+			{
+				$limitStart = 0;
+				$limit = 10;
+				$limitStart = ($limit != 0) ? (floor($limitStart / $limit) * $limit) : 0;
+				$this->state->set($this->_view . '_limit', $limit);
+				$this->state->set($this->_view . '_limitstart', $limitStart);
+			}
+		}
 
-        return $query;
-    }
+		return $this->db->setQuery($query, $limitStart, $limit)->loadAssocList();
+	}
 
-    /**
-     * Get list of stages
-     * @param  int   $id specific search id
-     * @return mixed $results results
-     */
-    public function getStatuses($id=null)
-    {
-        //database
-        $db = JFactory::getDBO();
-        $query = $this->_buildQuery();
+	public function getStatus($id = null)
+	{
+		$id = $id ? $id : $this->id;
 
-        //return results
-        $db->setQuery($query);
+		if ($id > 0)
+		{
+			//database
+			$query = $this->_buildQuery()
+				->where('s.id = ' . $id);
 
-        return $db->loadAssocList();
+			//return results
+			return $this->db->setQuery($query)->loadObject();
+		}
 
-    }
+		return $this->getTable('Statuses');
+	}
 
-    public function getStatus($id=null)
-    {
-        $id = $id ? $id : $this->id;
+	public function populateState()
+	{
+		//get states
+		$filter_order	 = $this->app->getUserStateFromRequest('Statuses.filter_order', 'filter_order', 's.name');
+		$filter_order_Dir = $this->app->getUserStateFromRequest('Statuses.filter_order_Dir', 'filter_order_Dir', 'asc');
 
-        if ($id > 0) {
+		$state = new Registry;
 
-            //database
-            $db = JFactory::getDBO();
-            $query = $this->_buildQuery();
+		//set states
+		$state->set('Statuses.filter_order', $filter_order);
+		$state->set('Statuses.filter_order_Dir', $filter_order_Dir);
 
-            $query->where("s.id=$id");
+		// Get pagination request variables
+		$limit = $this->app->getUserStateFromRequest($this->_view . '_limit', 'limit', 10);
+		$limitstart = $this->app->getUserStateFromRequest($this->_view . '_limitstart', 'limitstart', 0);
 
-            //return results
-            $db->setQuery($query);
+		// In case limit has been changed, adjust it
+		$limitstart = ($limit != 0 ? (floor($limitstart / $limit) * $limit) : 0);
 
-            return $db->loadAssoc();
+		$state->set($this->_view . '_limit', $limit);
+		$state->set($this->_view . '_limitstart', $limitstart);
 
-        } else {
-            return (array) new StatusesTable;
+		$this->setState($state);
+	}
 
-        }
+	public function delete($id)
+	{
+		$table = $this->getTable('Statuses');
+		$table->delete($id);
+	}
 
-    }
+	/**
+	 * Describe and configure columns for jQuery dataTables here.
+	 *
+	 * 'data'	   ... column id
+	 * 'orderable'  ... if the column can be ordered by user or not
+	 * 'ordering'   ... name of the column in SQL query with table prefix
+	 * 'sClass'	 ... CSS class applied to the column
+	 * (other settings can be found at dataTable documentation)
+	 *
+	 * @return array
+	 */
+	public function getDataTableColumns()
+	{
+		$columns = array();
+		$columns[] = array('data' => 'id', 'orderable' => false, 'sClass' => 'text-center');
+		$columns[] = array('data' => 'name', 'ordering' => 's.name');
+		$columns[] = array('data' => 'color', 'ordering' => 's.color', 'sClass' => 'text-center');
 
-    public function populateState()
-    {
-        //get states
-        $app = \Cobalt\Container::get('app');
-        $filter_order = $app->getUserStateFromRequest('Statuses.filter_order','filter_order','s.name');
-        $filter_order_Dir = $app->getUserStateFromRequest('Statuses.filter_order_Dir','filter_order_Dir','asc');
+		return $columns;
+	}
 
-        $state = new Registry;
+	/**
+	 * Method transforms items to the format jQuery dataTables needs.
+	 * Algorithm is available in parent method, just pass items array.
+	 *
+	 * @param   array  $items  of object of items from the database
+	 *
+	 * @return  array  in format dataTables requires
+	 */
+	public function getDataTableItems($items = array())
+	{
+		if (!$items)
+		{
+			$items = $this->getStatuses();
+		}
 
-        //set states
-        $state->set('Statuses.filter_order', $filter_order);
-        $state->set('Statuses.filter_order_Dir',$filter_order_Dir);
+		return parent::getDataTableItems($items);
+	}
 
-        $this->setState($state);
-    }
+	/**
+	 * Prepare HTML field templates for each dataTable column.
+	 *
+	 * @param   string  $column  name
+	 * @param   object  $item    of item
+	 *
+	 * @return  string HTML template for propper field
+	 */
+	public function getDataTableFieldTemplate($column, $item)
+	{
+		$template = '';
 
-    public function remove($id)
-    {
-        //get dbo
-        $db = JFactory::getDBO();
-        $query = $db->getQuery(true);
+		switch ($column)
+		{
+			case 'id':
+				$template .= '<input type="checkbox" class="export" name="ids[]" value="' . $item->id . '" />';
+				break;
+			case 'name':
+				$template .= '<a href="' . RouteHelper::_('index.php?view=statuses&layout=edit&id=' . $item->id) . '">' . $item->name . '</a>';
+				break;
+			case 'color':
+				$template .= '<i class="glyphicon glyphicon-bookmark" style="color:#' . $item->color . '"></i>';
+				break;
+			default:
+				if (isset($column) && isset($item->{$column}))
+				{
+					$template = $item->{$column};
+				}
+				else
+				{
+					$template = '';
+				}
+				break;
+		}
 
-        //delete id
-        $query->delete('#__people_status')->where('id = '.$id);
-        $db->setQuery($query);
-        $db->query();
-    }
-
+		return $template;
+	}
 }

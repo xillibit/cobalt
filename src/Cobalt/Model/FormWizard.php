@@ -24,7 +24,7 @@ class FormWizard extends DefaultModel
     public function populateState()
     {
         //get states
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
         $filter_order = $app->getUserStateFromRequest('Formwizard.filter_order','filter_order','f.name');
         $filter_order_Dir = $app->getUserStateFromRequest('Formwizard.filter_order_Dir','filter_order_Dir','asc');
 
@@ -39,13 +39,15 @@ class FormWizard extends DefaultModel
 
     public function store()
     {
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
 
         //Load Tables
-        $row = new FormWizardTable;
+        $row = $this->getTable('FormWizard');
         $data = $app->input->getRequest( 'post' );
 
-        $userId = JFactory::getUser()->id;
+        $app = \Cobalt\Container::fetch('app');
+        $user = $app->getUser();
+        $userId = $user->get('id');
 
         //date generation
         $date = date('Y-m-d H:i:s');
@@ -86,25 +88,16 @@ class FormWizard extends DefaultModel
         }
 
         // Bind the form fields to the table
-        if (!$row->bind($data)) {
-            $this->setError($this->db->getErrorMsg());
+	    try
+	    {
+		    $row->save($data);
+	    }
+	    catch (\Exception $exception)
+	    {
+		    $this->app->enqueueMessage($exception->getMessage(), 'error');
 
-            return false;
-        }
-
-        // Make sure the record is valid
-        if (!$row->check()) {
-            $this->setError($this->db->getErrorMsg());
-
-            return false;
-        }
-
-        // Store the web link table to the database
-        if (!$row->store()) {
-            $this->setError($this->db->getErrorMsg());
-
-            return false;
-        }
+		    return false;
+	    }
 
         return true;
     }
@@ -155,7 +148,7 @@ class FormWizard extends DefaultModel
             return $result;
 
         } else {
-            return (array) new FormWizardTable;
+            return (array) $this->getTable('FormWizard');
 
         }
     }

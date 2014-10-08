@@ -12,7 +12,7 @@ namespace Cobalt\View\Deals;
 
 use JUri;
 use JFactory;
-use RouteHelper;
+use Cobalt\Helper\RouteHelper;
 use Cobalt\Model\Deal as DealModel;
 use Cobalt\Model\Event as EventModel;
 use Cobalt\Model\Company as CompanyModel;
@@ -34,7 +34,7 @@ class Html extends AbstractHtmlView
 
     public function render()
     {
-        $app = JFactory::getApplication();
+        $app = \Cobalt\Container::fetch('app');
 
         //retrieve deal list from model
         $model = new DealModel;
@@ -57,6 +57,8 @@ class Html extends AbstractHtmlView
             if ( is_null($dealList[0]->id) ) {
                 $app->redirect(RouteHelper::_('index.php?view=deals'),TextHelper::_('COBALT_NOT_AUTHORIZED'));
             }
+            //display remove and assign primary contact to deal
+            $app->input->set('loc', 'deal');
         } else {
         //else load all deals
             if ( $app->input->get('layout') != 'edit' ) {
@@ -123,7 +125,7 @@ class Html extends AbstractHtmlView
         //get deal type filters
         $deal_types = DealHelper::getDealTypes();
         $deal_type_name = $session->get('deal_type_filter');
-        $deal_type_name = ( $deal_type_name ) ? $deal_types[$deal_type_name] : $deal_types['all'];
+        $deal_type_name = array_key_exists($deal_type_name, $deal_types) ? $deal_types[$deal_type_name] : $deal_types[''];
 
         //get column filters
         $column_filters = DealHelper::getColumnFilters();
@@ -175,11 +177,13 @@ class Html extends AbstractHtmlView
             $primary_contact_id = DealHelper::getPrimaryContact($dealList[0]->id);
             $this->contact_info = ViewHelper::getView('contacts','default','phtml',array('contacts'=>$dealList[0]->people,'primary_contact_id'=>$primary_contact_id));
 
-            $this->document_list = ViewHelper::getView('documents','document_row','phtml',array('documents'=>$deal->documents));
+            $this->document_list = ViewHelper::getView('documents','list','phtml',array('documents' => $deal->documents,'total'=>$total,'pagination'=>$pagination));
+            //$this->document_list = ViewHelper::getView('documents','document_row','phtml',array('documents'=>$deal->documents));
             $this->custom_fields_view = ViewHelper::getView('custom','default','phtml',array('type'=>'deal','item'=>$dealList[0]));
         }
 
         if ($layout == "default") {
+            $this->dataTableColumns = $model->getDataTableColumns();
             $pagination = $model->getPagination();
             $total = $model->getTotal();
             $this->deal_list = ViewHelper::getView('deals','list','phtml',array('dealList'=>$dealList,'total'=>$total,'pagination'=>$pagination));
@@ -188,7 +192,8 @@ class Html extends AbstractHtmlView
             loc = 'deals';
             order_url = 'index.php?view=deals&layout=list&format=raw&tmpl=component';
             order_dir = '".$state->get('Deal.filter_order_Dir')."';
-            order_col = '".$state->get('Deal.filter_order')."';");
+            order_col = '".$state->get('Deal.filter_order')."';
+            var dataTableColumns = " . json_encode($this->dataTableColumns) . ";");
 
             $deal_name = $state->get('Deal.deals_name');
             $this->deal_filter = $deal_name;

@@ -2,6 +2,8 @@ body {
     padding-top:50px;
 }
 #com_cobalt h1, #com_cobalt h2, #com_cobalt h3, #com_cobalt h4 {font-family: 'Helvetica Neue', Helvetica, Arial; font-weight: 300;}
+#com_cobalt h3 {font-size: 20px;}
+
 #com_cobalt .list-inline > li,
 #com_cobalt .list-inline > li > a {
     position: relative;
@@ -9,11 +11,169 @@ body {
 #com_cobalt .popover {
     min-width:200px;
 }
+
 /* Top Nav */
-.navbar-inner {background-color: #0047ab; background-image: linear-gradient(to bottom, #0047ab, #00409b); background-image: -webkit-linear-gradient(top,#0047ab,#00409b); background-image: -o-linear-gradient(top,#0047ab,#00409b); background-image: linear-gradient(to bottom,#0047ab,#00409b);background-repeat: repeat-x;}
-.navbar .nav > li > a, .navbar .brand {color: #f1f1f1; text-shadow: 0 0 1px #00409b;}
-.navbar .nav > li > a:hover, .navbar .nav > li a.active {background: #00409b; color: #FFFFFF;}
-.navbar-inner form {margin: 0;}
+.navbar.navbar-default {background-color: #2d2d2d; background-image: linear-gradient(to bottom, #2d2d2d, #191919); background-image: -webkit-linear-gradient(top,#2d2d2d,#191919); background-image: -o-linear-gradient(top,#2d2d2d,#191919); background-image: linear-gradient(to bottom,#2d2d2d,#191919);background-repeat: repeat-x;}
+.navbar .nav > li > a, .navbar-default .navbar-brand, .navbar-default .navbar-brand:hover {color: #f1f1f1; text-shadow: 0 0 1px #191919; font-weight: 100; letter-spacing: 1px;}
+.navbar .nav > li > a:hover, .navbar .nav > li a.active {background: #191919; color: #FFFFFF;}
+.navbar.navbar-default form {margin: 0;}
+#site-logo-img {height: 40px;margin: 7px 7px 0 0;}
 
 /* Filter Sentence */
 ul.inline.filter-sentence > li {padding: 0;}
+
+.alert-flying {
+   right: 30px;
+   overflow: hidden;
+   position: fixed;
+   width: 300px;
+   opacity: 0.9;
+   z-index: 1050;
+   top: 65px;
+}
+
+/* Hide action bar by defaut (showed in right time by JS) */
+#list_edit_actions {display: none;}
+
+/* Autocomplete CSS */
+.typeahead,
+.tt-hint {
+    width: auto;
+    height: 30px;
+    padding: 8px 12px;
+    line-height: 30px;
+    border: 1px solid #024e6a;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+    outline: none;
+}
+
+.typeahead {
+    background-color: #fff;
+}
+
+.tt-hint {
+    color: #999
+}
+
+.tt-dropdown-menu {
+    width: auto;
+    margin-top: 12px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+    -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+    -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+    box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+
+.tt-suggestion {
+    padding: 8px 20px;
+    font-size: 14px;
+    line-height: 18px;
+    cursor: pointer;
+}
+
+.tt-suggestion + .tt-suggestion {
+    font-size: 14px;
+    border-top: 1px solid #ccc;
+}
+
+.tt-suggestions .repo-language {
+    float: right;
+    font-style: italic;
+}
+
+.tt-suggestions .repo-name {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.tt-suggestions .repo-description {
+    margin: 0;
+}
+
+#multiple-datasets .autocomplete-title {
+    margin: 0 20px 5px 20px;
+    padding: 3px 0;
+    border-bottom: 1px solid #ccc;
+}
+#site_search_input {
+    background-color: #fff !important;
+}
+
+/* File Button */
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+/* calendar */
+div#actions, div.filters, div.dropdown_area, div#edit_menu {
+    background: none repeat scroll 0 0 #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    box-shadow: 1px 1px 3px 0 #ccc;
+    display: none;
+    margin-top: 8px;
+    overflow: hidden;
+    padding: 10px;
+    position: absolute;
+    text-align: left;
+    z-index: 1;
+}
+
+/* Chart slider */
+.carousel-control.left, .carousel-control.right {
+    background-image: none;
+}
+.carousel-control {
+    text-shadow: 0 3px 14px rgba(0, 0, 0, .6);
+}
+.carousel-caption {
+    color: #666;
+}
+.carousel-indicators li {
+    border: 1px solid #666;
+}
+.carousel-indicators .active {
+    background-color: #666;
+}
+.carousel-inner > .item {
+    padding-bottom: 68px;
+}
+
+/* DataTables */
+.dataTables_wrapper {
+    position: relative;
+}
+.dataTables_processing {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+
+/* Support button dropdown inside btn-group */
+.btn-group-dropdown {
+    position: absolute;
+
+}

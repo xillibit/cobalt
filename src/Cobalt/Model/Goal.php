@@ -31,13 +31,13 @@ class Goal extends DefaultModel
      */
     public function store()
     {
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
 
         //Load Tables
-        $row = new GoalTable;
-        $oldRow = new GoalTable;
+        $row = $this->getTable('Goal');
+        $oldRow = $this->getTable('Goal');
 
-        $data = $app->input->getRequest( 'post' );
+        $data = $app->input->getArray();
 
         //date generation
         $date = DateHelper::formatDBDate(date('Y-m-d H:i:s'));
@@ -57,25 +57,16 @@ class Goal extends DefaultModel
         $data['owner_id'] = UsersHelper::getUserId();
 
         // Bind the form fields to the table
-        if (!$row->bind($data)) {
-            $this->setError($this->db->getErrorMsg());
+	    try
+	    {
+		    $row->save($data);
+	    }
+	    catch (\Exception $exception)
+	    {
+		    $this->app->enqueueMessage($exception->getMessage(), 'error');
 
-            return false;
-        }
-
-        // Make sure the record is valid
-        if (!$row->check()) {
-            $this->setError($this->db->getErrorMsg());
-
-            return false;
-        }
-
-        // Store the web link table to the database
-        if (!$row->store()) {
-            $this->setError($this->db->getErrorMsg());
-
-            return false;
-        }
+		    return false;
+	    }
 
         ActivityHelper::saveActivity($oldRow, $row,'goal', $status);
 
@@ -227,7 +218,7 @@ class Goal extends DefaultModel
        $query = $db->getQuery(true);
 
        //load goals associated with team id
-       $query->select("g.*,u.first_name,u.last_name,IF(t.name!='',t.name,CONCAT(u.first_name,' ',u.last_name)) AS team_name")
+       $query->select("g.*,u.first_name,u.last_name,(CASE WHEN (t.name IS NOT NULL) THEN t.name ELSE CONCAT(u.first_name,NULL,u.last_name) END) AS team_name")
        ->from("#__goals AS g");
 
        //if we are searching for a specific team
@@ -670,6 +661,28 @@ class Goal extends DefaultModel
         $results = $db->loadAssocList();
 
         return $results;
+    }
+
+    public function getGoal($id=null)
+    {
+        $id = $id ? $id : $this->app->input->get('item_id');
+
+        if ($id > 0)
+        {
+            $db = $this->getDb();
+
+            $query = $db->getQuery(true);
+
+            $query->select('*');
+            $query->from('#__goals');
+            $query->where('id='.$db->quote($id));
+
+            $db->setQuery($query);
+
+            $deal = $db->loadObject();
+        }
+
+        return $deal;
     }
 
 }

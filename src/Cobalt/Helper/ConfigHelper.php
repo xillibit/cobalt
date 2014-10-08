@@ -21,7 +21,7 @@ class ConfigHelper
 {
      public static function getImapConfig()
      {
-        $db = \Cobalt\Container::get('db');
+        $db = \Cobalt\Container::fetch('db');
         $query = $db->getQuery(true);
         $query->select("imap_host,imap_pass,imap_user")->from("#__config")->where("id=1");
         $db->setQuery($query);
@@ -54,22 +54,12 @@ class ConfigHelper
 
     public static function getVersion()
     {
-        $xml = JFactory::getXML( 'simple' );
-
-         if ( file_exists(JPATH_SITE.'/administrator/cobalt.xml')) {
-             $xml->loadFile( JPATH_SITE.'/administrator/cobalt.xml' );
-            $position = $xml->document->getElementByPath(  'version' );
-
-            return $position->data();
-         } else {
-             return 0;
-         }
-
+	    return COBALT_VERSION;
     }
 
     public static function getNamingConventions()
     {
-        $db = \Cobalt\Container::get('db');
+        $db = \Cobalt\Container::fetch('db');
         $query = $db->getQuery(true);
         $query->select("lang_deal,lang_person,lang_company,lang_contact,lang_lead,lang_task,lang_event,lang_goal")
                 ->from("#__config")
@@ -158,7 +148,7 @@ class ConfigHelper
     public static function getLanguages()
     {
         jimport('joomla.filesystem.folder');
-        $dirs = Folder::folders(JPATH_SITE."/language");
+        $dirs = Folder::folders(JPATH_ROOT."/language");
 
         $ret = array();
         if ( count($dirs) > 0 ) {
@@ -183,7 +173,7 @@ class ConfigHelper
         $config = JFactory::getConfig();
         $config->set("language",$lang);
 
-        $file = JPATH_BASE."/configuration.php";
+        $file = JPATH_CONFIGURATION."/configuration.php";
         file_put_contents($file, $config->toString('PHP', array('class' => 'JConfig', 'closingtag' => false)));
 
     }

@@ -11,12 +11,26 @@
 defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
 
 <div class="page-header">
+<!-- Single button -->
+<div class="btn-group pull-right">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+        <i class="glyphicon glyphicon-plus icon-white"></i> <?php echo TextHelper::_("COBALT_CREATE"); ?>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+        <li><a data-target="#editModal" data-toggle="modal" href="<?php echo RouteHelper::_('index.php?view=goals&layout=edit&type=win_cash&tmpl=component&format=raw'); ?>"><?php echo ucwords(TextHelper::_('COBALT_WIN_MORE_CASH')); ?></a></li>
+        <li><a data-target="#editModal" data-toggle="modal" href="<?php echo RouteHelper::_('index.php?view=goals&layout=edit&type=win_deals&tmpl=component&format=raw'); ?>"><?php echo ucwords(TextHelper::_('COBALT_WIN_MORE_DEALS')); ?></a></li>
+        <li><a data-target="#editModal" data-toggle="modal" href="<?php echo RouteHelper::_('index.php?view=goals&layout=edit&type=move_deals&tmpl=component&format=raw'); ?>"><?php echo ucwords(TextHelper::_('COBALT_MOVE_DEALS_FORWARD')); ?></a></li>
+        <li><a data-target="#editModal" data-toggle="modal" href="<?php echo RouteHelper::_('index.php?view=goals&layout=edit&type=complete_tasks&tmpl=component&format=raw'); ?>"><?php echo ucwords(TextHelper::_('COBALT_COMPLETE_TASKS')); ?></a></li>
+        <li><a data-target="#editModal" data-toggle="modal" href="<?php echo RouteHelper::_('index.php?view=goals&layout=edit&type=write_notes&tmpl=component&format=raw'); ?>"><?php echo ucwords(TextHelper::_('COBALT_WRITE_NOTES')); ?></a></li>
+        <li><a data-target="#editModal" data-toggle="modal" href="<?php echo RouteHelper::_('index.php?view=goals&layout=edit&type=create_deals&tmpl=component&format=raw'); ?>"><?php echo ucwords(TextHelper::_('COBALT_CREATE_DEALS')); ?></a></li>
+    </ul>
+</div>
     <h1><?php echo ucwords(TextHelper::_('COBALT_GOALS')); ?></h1>
 </div>
 
 <div class="row-fluid">
-    <div class="span6">
-    <ul class="goal_float_list unstyled" id="goal_floats_left">
+    <div class="col-md-6">
+    <ul class="goal_float_list list-unstyled" id="goal_floats_left">
         <li class="widget clearfix">
             <h3><?php echo ucwords(TextHelper::_('COBALT_LEADERBOARD')); ?></h3>
             <div class="goal_filter_container alert">
@@ -24,7 +38,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
                 <?php echo TextHelper::_("COBALT_SHOWING_LEADERBOARD"); ?> -
                     <span class="dropdown">
                         <a class="dropdown-toggle update-toggle-text" data-toggle="dropdown" href="#" role="button" id="leaderboard_filter_link" ><span class="dropdown-label"><?php $keys = array_keys($this->leaderboard_list); echo $this->leaderboard_list[$keys[0]]; ?></span><span class="caret"></span></a>
-                        <ul id="leaderboard_filter" class="unstyled dropdown-menu" role="menu">
+                        <ul id="leaderboard_filter" class="list-unstyled dropdown-menu" role="menu">
                             <?php foreach ($this->leaderboard_list as $key=>$name) {
                                  echo "<li><a href='javascript:void(0);' class='filter_".$key." dropdown_item' onclick=\"changeLeaderBoard('".$key."')\">".$name."</a></li>";
                             }?>
@@ -105,8 +119,8 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
     </ul>
 </div>
 
-<div class="span6">
-    <ul class="goal_float_list unstyled" id="goal_floats_right">
+<div class="col-md-6">
+    <ul class="goal_float_list list-unstyled" id="goal_floats_right">
         <li class="widget clearfix">
                 <h3><?php echo TextHelper::_('COBALT_INDIVIDUAL_GOALS'); ?></h3>
                 <div class="goal_filter_container alert">
@@ -115,7 +129,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
                         <?php echo TextHelper::_('COBALT_GOALS_FOR'); ?> -
                         <span class="dropdown">
                             <a class="dropdown-toggle update-toggle-text" data-toggle="dropdown" href="#" role="button" id="user_goal_select_link" ><span class="dropdown-label"><?php echo TextHelper::_('COBALT_ME'); ?></span><span class="caret"></span></a>
-                            <ul class="unstyled dropdown-menu" role="menu">
+                            <ul class="list-unstyled dropdown-menu" role="menu">
                                 <li><a href="javascript:void(0);" class='filter_<?php echo $this->user_id; ?> dropdown_item'  onclick="changeIndividual(<?php echo $this->user_id; ?>);"><?php echo TextHelper::_('COBALT_ME'); ?></a></li>
                                 <?php foreach ($this->users as $user) { ?>
                                      <li><a href="javascript:void(0);" class='filter_<?php echo $user['id']; ?> dropdown_item' onclick="changeIndividual(<?php echo $user['id']; ?>);"><?php echo $user['first_name']." ".$user['last_name']; ?></a></li>
@@ -136,7 +150,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
                             foreach ($this->goals->individual_goals as $goal) { ?>
                                <div id="goal_<?php echo $goal['id']; ?>" class="goal_info clearfix well">
                                     <div class="clearfix">
-                                        <span class="goal_info_name"><?php echo $goal['name']; ?></span>
+                                        <span class="goal_info_name"><a href="<?php echo RouteHelper::_('index.php?view=goals&layout=edit&type='.$goal['goal_type'].'&tmpl=component&format=raw&id='.$goal['id']); ?>" data-toggle="modal" data-target="#editModal"><?php echo $goal['name']; ?></a></span>
                                         <span class="goal_info_due_date pull-right"><?php echo TextHelper::_('COBALT_BY'); ?> <?php echo DateHelper::formatDate($goal['end_date']); ?></span>
                                     </div>
                                     <div class="goal_info_progress clearfix progress progress-success">
@@ -172,10 +186,11 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
                     <?php } }
                     ?>
             </div>
+            <?php if ( count($this->goals->individual_goals) > 0 ): ?>
             <div class="pull-right">
-                    <a class="btn btn-success" href="<?php echo RouteHelper::_('index.php?view=goals&layout=add'); ?>"><i class="icon-plus icon-white"></i><?php echo TextHelper::_("COBALT_ADD_GOAL"); ?></a>
-                    <a href="javascript:void(0);" class="btn delete_goals" id="goal_type_member"><i class="icon-trash"></i><?php echo TextHelper::_("COBALT_DELETE_GOALS"); ?></a>
+                    <a data-target="#editModal" data-toggle="modal" href="<?php echo RouteHelper::_('index.php?view=goals&goal_type=member&format=raw&tmpl=component&layout=delete'); ?>" class="btn delete_goals" id="goal_type_member"><i class="glyphicon glyphicon-trash"></i><?php echo TextHelper::_("COBALT_DELETE_GOALS"); ?></a>
             </div>
+            <?php endif; ?>
         </li>
         <li class="widget clearfix">
             <h3><?php echo TextHelper::_("COBALT_TEAM_GOALS"); ?></h3>
@@ -186,7 +201,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
                    <?php echo TextHelper::_('COBALT_GOALS_FOR'); ?> -
                    <span class="dropdown">
                        <a href="javascript:void(0);" class="dropdown-toggle update-toggle-text" data-toggle="dropdown" role="button" id="team_goal_select_link" ><span class="dropdown-label"><?php echo TextHelper::_("COBALT_MY_TEAM"); ?></span><span class="caret"></span></a>
-                        <ul class="unstyled dropdown-menu" role="menu" id="team_goal_select">
+                        <ul class="list-unstyled dropdown-menu" role="menu" id="team_goal_select">
                             <li><a href="javascript:void(0);" class='filter_<?php echo $this->team_id; ?> dropdown_item'  onclick="changeTeam(<?php echo $this->team_id; ?>)"><?php echo TextHelper::_("COBALT_MY_TEAM"); ?></a></li>
                             <?php foreach ($this->teams as $team) { ?>
                                 <li><a href="javascript:void(0);" class='filter_<?php echo $team['team_id']; ?> dropdown_item'  onclick="changeTeam(<?php echo $team['team_id']; ?>)"><?php echo $team['team_name'].TextHelper::_('COBALT_TEAM_APPEND'); ?></a></li>
@@ -207,7 +222,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
                         foreach ($this->goals->team_goals as $goal) { ?>
                             <div id="goal_<?php echo $goal['id']; ?>" class="goal_info well">
                                 <div class="clearfix">
-                                    <span class="goal_info_name"><?php echo $goal['name']; ?></span>
+                                    <span class="goal_info_name"><a href="<?php echo RouteHelper::_('index.php?view=goals&layout=edit&type='.$goal['goal_type'].'&tmpl=component&format=raw&id='.$goal['id']); ?>" data-toggle="modal" data-target="#editModal"><?php echo $goal['name']; ?></a></span>
                                     <span class="goal_info_due_date pull-right"><?php echo TextHelper::_('COBALT_BY'); ?> <?php echo DateHelper::formatDate($goal['end_date']); ?></span>
                                 </div>
                                 <div class="goal_info_progress clearfix progress progress-success">
@@ -243,10 +258,9 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
                 <?php } }
                 ?>
             </div>
-            <?php if ($this->member_role != 'basic') { ?>
+            <?php if ($this->member_role != 'basic' && count($this->goals->team_goals) > 0) { ?>
             <div class="pull-right">
-                    <a class="btn btn-success" href="<?php echo RouteHelper::_('index.php?view=goals&layout=add'); ?>"><i class="icon-plus icon-white"></i><?php echo TextHelper::_("COBALT_ADD_GOAL"); ?></a>
-                    <a href="javascript:void(0);" class="btn delete_goals" id="goal_type_team"><i class="icon-trash"></i><?php echo TextHelper::_("COBALT_DELETE_GOALS"); ?></a>
+                    <a data-target="#editModal" data-toggle="modal" href="<?php echo RouteHelper::_('index.php?view=goals&goal_type=team&format=raw&tmpl=component&layout=delete'); ?>" class="btn delete_goals" id="goal_type_team"><i class="glyphicon glyphicon-trash"></i><?php echo TextHelper::_("COBALT_DELETE_GOALS"); ?></a>
             </div>
             <?php } ?>
         </li>
@@ -258,7 +272,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
                             foreach ($this->goals->company_goals as $goal) { ?>
                               <div id="goal_<?php echo $goal['id']; ?>" class="goal_info well">
                                     <div class="clearfix">
-                                        <span class="goal_info_name"><?php echo $goal['name']; ?></span>
+                                        <span class="goal_info_name"><a href="<?php echo RouteHelper::_('index.php?view=goals&layout=edit&type='.$goal['goal_type'].'&tmpl=component&format=raw&id='.$goal['id']); ?>" data-toggle="modal" data-target="#editModal"><?php echo $goal['name']; ?></a></span>
                                         <span class="goal_info_due_date pull-right"><?php echo TextHelper::_('COBALT_BY'); ?> <?php echo DateHelper::formatDate($goal['end_date']); ?></span>
                                     </div>
                                     <div class="goal_info_progress progress progress-success clearfix">
@@ -294,10 +308,9 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
                     <?php } }
                     ?>
                 </div>
-                <?php if ($this->member_role == 'exec') { ?>
+                <?php if ($this->member_role == 'exec' && count($this->goals->company_goals) > 0) { ?>
                 <div class="pull-right">
-                    <a class="btn btn-success" href="<?php echo RouteHelper::_('index.php?view=goals&layout=add'); ?>"><i class="icon-plus icon-white"></i><?php echo TextHelper::_("COBALT_ADD_GOAL"); ?></a>
-                    <a href="javascript:void(0);" class="btn delete_goals" id="goal_type_company"><i class="icon-trash"></i><?php echo TextHelper::_("COBALT_DELETE_GOALS"); ?></a>
+                    <a data-target="#editModal" data-toggle="modal" href="<?php echo RouteHelper::_('index.php?view=goals&goal_type=company&format=raw&tmpl=component&layout=delete'); ?>" class="btn delete_goals" id="goal_type_company"><i class="glyphicon glyphicon-trash"></i><?php echo TextHelper::_("COBALT_DELETE_GOALS"); ?></a>
                 </div>
                 <?php } ?>
         </li>
@@ -305,3 +318,15 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
 </div>
 </div>
 <div id="delete_goals"></div>
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content"></div>
+    </div>
+</div>
+<script>
+    //clear modal data when close
+    $('#editModal').on('hidden.bs.modal', function (e) {
+        $('#editModal').removeData('bs.modal');
+    })
+</script>

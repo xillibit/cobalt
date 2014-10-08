@@ -12,20 +12,28 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
 
 ?>
     <thead>
-        <th><div class="sort_order"><a href="javascript:void(0);"class="d.type" onclick="sortTable('d.type',this)"><?php echo TextHelper::_('COBALT_DOCUMENT_TYPE'); ?></a></div></th>
-        <th><div class="sort_order"><a href="javascript:void(0);"class="d.filename" onclick="sortTable('d.filename',this)"><?php echo TextHelper::_('COBALT_DOCUMENT_NAME'); ?></a></div></th>
+    <tr>
+        <?php if (JFactory::getApplication()->input->getString('loc','documents') == 'documents'): ?>
+        <th class="checkbox_column"><input type="checkbox" onclick="Cobalt.selectAll(this);" title="<?php echo TextHelper::_('COBALT_CHECK_ALL_ITEMS'); ?>" data-placement="bottom" type="checkbox" /></th>
+        <?php endif; ?>
+        <th><?php echo TextHelper::_('COBALT_DOCUMENT_TYPE'); ?></th>
+        <th><?php echo TextHelper::_('COBALT_DOCUMENT_NAME'); ?></th>
+        <?php if (JFactory::getApplication()->input->getString('loc','documents') == 'documents'): ?>
         <th><?php echo TextHelper::_('COBALT_DOCUMENT_ASSOCIATION'); ?></th>
-        <th><div class="sort_order"><a href="javascript:void(0);"class="p.last_name" onclick="sortTable('p.last_name',this)"><?php echo TextHelper::_('COBALT_DOCUMENT_OWNER'); ?></a></div></th>
+        <?php endif; ?>
+        <th><?php echo TextHelper::_('COBALT_DOCUMENT_OWNER'); ?></th>
         <th><?php echo TextHelper::_('COBALT_DOCUMENT_SIZE'); ?></th>
-        <th><div class="sort_order"><a href="javascript:void(0);"class="d.created" onclick="sortTable('d.created',this)"><?php echo TextHelper::_('COBALT_DOCUMENT_UPLOADED'); ?></a></div></th>
+        <th><?php echo TextHelper::_('COBALT_DOCUMENT_UPLOADED'); ?></th>
+    </tr>
     </thead>
-   <tbody class="results" id="documents">
+   <tbody id="list">
 
 <?php
 
     if ( count($this->documents) > 0 ) {
         foreach ($this->documents as $key => $document) {
             $k = $key%2;
+            $row_class = $k == 0 ? 'odd' : 'even' ;
 
             //assign association link
             switch ($document['association_type']) {
@@ -37,7 +45,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
                 case "person":
                     $view = "people";
                     $association_type = "person";
-                    $document['association_name'] = $document['first_name']." ".$document['last_name'];
+                    $document['association_name'] = $document['owner_first_name']." ".$document['owner_last_name'];
                     break;
                 case "company";
                     $view = "companies";
@@ -51,19 +59,22 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
                 $association_link = "";
             }
 
-            echo '<tr class="document_'.$key.'" id="document_row_'.$document['id'].'" class="cobalt_row_'.$k.'">';
+            echo '<tr id="document_row_'.$document['id'].'" role="row" class="'.$row_class.'">';
+                echo '<td class="text-center"><input type="checkbox" value="'.$document['id'].'" name="ids[]" class="export"></td>';
                 echo '<td><img width="30px" height="30px" src="'.JURI::base().'src/Cobalt/media/images/'.$document['filetype'].'.png'.'" /><br /><b>'.strtoupper($document['filetype']).'<b></td>';
                 echo '<td><div class="dropdown"><span class="caret"></span> <a href="javascript:void(0);" class="document_edit dropdown-toggle" role="button" data-toggle="dropdown" id="'.$document['id'].'">'.$document['name'].'</a>';
                 echo '<ul class="dropdown-menu" role="menu">';
                 echo '<input type="hidden" name="document_'.$document['id'].'_hash" id="document_'.$document['id'].'_hash" value="'.$document['filename'].'" />';
                     if ($document['is_image']) {
-                        echo '<li><a href="javascript:void(0);" class="document_preview" id="preview_'.$document['id'].'"><i class="icon-eye-open"></i> '.TextHelper::_('COBALT_PREVIEW').'</a></li>';
+                        echo '<li><a href="javascript:void(0);" class="document_preview" id="preview_'.$document['id'].'"><i class="glyphicon glyphicon-eye-open"></i> '.TextHelper::_('COBALT_PREVIEW').'</a></li>';
                     }
-                echo '<li><a href="javascript:void(0);" class="document_download" id="download_'.$document['id'].'"> <i class="icon-download"></i> '.TextHelper::_('COBALT_DOWNLOAD').'</a></li>';
-                echo '<li><a href="javascript:void(0);" class="document_delete" id="delete_'.$document['id'].'"><i class="icon-trash"></i> '.TextHelper::_('COBALT_DELETE').'</a></li>';
+                echo '<li><a href="javascript:void(0);" class="document_download" id="download_'.$document['id'].'"> <i class="glyphicon glyphicon-download"></i> '.TextHelper::_('COBALT_DOWNLOAD').'</a></li>';
+                echo '<li><a href="javascript:void(0);" class="document_delete" id="delete_'.$document['id'].'"><i class="glyphicon glyphicon-trash"></i> '.TextHelper::_('COBALT_DELETE').'</a></li>';
                 echo '</ul>';
                 echo '</div></td>';
-                echo '<td>'.$association_link.'</a></td>';
+                if (JFactory::getApplication()->input->getString('loc','documents') == 'documents') {
+                    echo '<td>'.$association_link.'</a></td>';
+                }
                 echo '<td>'.$document['owner_name'].'</td>';
                 echo '<td>'.$document['size'].'Kb</td>';
                 echo '<td>'.DateHelper::formatDate($document['created']).'</td>';
@@ -71,23 +82,4 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
         }
     }
 ?>
-<script type="text/javascript">
-    jQuery("#documents_matched").html('<?php echo count($this->documents); ?>');
-    var documents = <?php echo json_encode($this->documents); ?>;
-    var document_names = <?php
-                                //assign document names for autocomplete dialogs
-                                $names = array();
-
-                                if ( count($this->documents)> 0 ) {
-                                    foreach ($this->documents as $key => $document) {
-                                        $names[] = $document['filename'];
-                                    }
-                                }
-
-                                 echo json_encode($names);
-                            ?>;
-    order_url = "<?php echo 'index.php?view=documents&layout=list&format=raw&tmpl=component'; ?>";
-    order_dir = "<?php echo $this->state->get('Document.filter_order_Dir'); ?>";
-    order_col = "<?php echo $this->state->get('Document.filter_order'); ?>";
-</script>
 </tbody>

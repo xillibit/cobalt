@@ -10,9 +10,10 @@
 
 namespace Cobalt\Model;
 
-use RouteHelper;
+use Cobalt\Helper\RouteHelper;
 use Cobalt\Container;
 use Cobalt\Pagination;
+use Cobalt\Table\AbstractTable;
 use Joomla\Model\AbstractDatabaseModel;
 use Joomla\Database\DatabaseDriver;
 
@@ -21,25 +22,30 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
 
 class DefaultModel extends AbstractDatabaseModel
 {
+    public $id;
+
     protected $__state_set;
     protected $_total;
     protected $_pagination;
-    protected $id;
-    protected $db;
+    protected $_view;
+    protected $_layout;
+
+	/**
+	 * @var    \Cobalt\Application
+	 * @since  1.0
+	 */
     protected $app;
 
     public function __construct(DatabaseDriver $db = null)
     {
         if (is_null($db))
         {
-            $db = Container::get('db');
+            $db = Container::fetch('db');
         }
 
-        $this->db = $db;
+	    parent::__construct($db);
 
-        $this->app = Container::get('app');
-
-        parent::__construct($db);
+        $this->app = Container::fetch('app');
 
         $ids = $this->app->input->get("cids", null, 'array');
 
@@ -60,7 +66,7 @@ class DefaultModel extends AbstractDatabaseModel
 
     }
 
-     /**
+    /**
      * Modifies a property of the object, creating it if it does not already exist.
      *
      * @param string $property The name of the property.
@@ -76,6 +82,24 @@ class DefaultModel extends AbstractDatabaseModel
         $this->$property = $value;
 
         return $previous;
+    }
+
+    /**
+     * returns a property of the object, even if it's protected.
+     *
+     * @param string $property The name of the property.
+     * @param mixed  $default  Default value if the property doesn't exist.
+     *
+     * @return mixed The value of the property.
+     */
+    public function get($property, $default = null)
+    {
+        if (isset($this->$property))
+        {
+            return $this->$property;
+        }
+
+        return $default;
     }
 
     /**
@@ -160,4 +184,76 @@ class DefaultModel extends AbstractDatabaseModel
       return $this->_pagination;
     }
 
+    /**
+     * Set the object properties based on a named array/hash.
+     *
+     * @param   mixed  $properties  Either an associative array or another object.
+     *
+     * @return  boolean
+     */
+    public function setProperties($properties)
+    {
+        if (is_array($properties) || is_object($properties))
+        {
+            foreach ((array) $properties as $k => $v)
+            {
+                // Use the set function which might be overridden.
+                $this->set($k, $v);
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Method transforms items to the format jQuery dataTables needs
+     *
+     * @param   array of object of items from the database
+     * @return  array in format dataTables requires
+     */
+    public function getDataTableItems($items)
+    {
+        $tableItems = array();
+        $columns = $this->getDataTableColumns();
+
+        foreach ($items as $item)
+        {
+            $tableItem = new \stdClass;
+
+            foreach ($columns as $column)
+            {
+                $tableItem->{$column['data']} = $this->getDataTableFieldTemplate($column['data'], (object) $item);
+            }
+
+            $tableItems[] = $tableItem;
+        }
+
+        return $tableItems;
+    }
+
+	/**
+	 * Method to get a table object
+	 *
+	 * @param   string  $name    The table name.
+	 * @param   string  $suffix  The class suffix. Optional.
+	 *
+	 * @return  AbstractTable
+	 *
+	 * @since   1.0
+	 * @throws  \RuntimeException
+	 */
+	public function getTable($name, $suffix = 'Table')
+	{
+		$namespace = str_replace('Model', 'Table', __NAMESPACE__);
+
+		$class = $namespace . '\\' . $name . $suffix;
+
+		if (!class_exists($class) && !($class instanceof AbstractTable))
+		{
+			throw new \RuntimeException(sprintf('Table class %s not found or is not an instance of AbstractTable.', $class));
+		}
+
+		return new $class($this->getDb());
+	}
 }

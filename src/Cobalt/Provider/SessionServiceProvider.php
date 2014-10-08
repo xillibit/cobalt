@@ -9,27 +9,50 @@
 namespace Cobalt\Provider;
 
 use JFactory;
-use Cobalt\Container;
+use Joomla\DI\Container;
+use Joomla\DI\ServiceProviderInterface;
+use Joomla\Registry\Registry;
 use Symfony\Component\HttpFoundation\Session\Session;
 
+/**
+ * Configuration service provider
+ *
+ * @since  1.0
+ */
 class SessionServiceProvider implements ServiceProviderInterface
 {
-    public function register(Container $container)
-    {
-        $config = $container->resolve('config');
+	/**
+	 * Registers the service provider with a DI container.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0
+	 */
+	public function register(Container $container)
+	{
+		$config = $container::fetch('config');
 
-        if ($config->get('session', true) !== false) {
+		if ($config->get('session', true) !== false)
+		{
+			$session = new Session;
 
-            $session = new Session;
+			$session->start();
 
-            $session->start();
+			$registry = $session->get('registry');
 
-            // @TODO Remove JFactory
-            JFactory::$session = $session;
+            if (is_null($registry))
+            {
+                $session->set('registry', new Registry('session'));
+            }
 
-            $container->bind('session', function () use ($session) {
-                    return $session;
-                });
-        }
-    }
+			// @TODO Remove JFactory
+			JFactory::$session = $session;
+
+			$container->set('session', function () use ($session) {
+				return $session;
+			}, true, true);
+		}
+	}
 }

@@ -10,6 +10,7 @@
 
 namespace Cobalt\Model;
 
+use Cobalt\Table\DealTable;
 use Cobalt\Table\NoteTable;
 use JFactory;
 use Cobalt\Helper\TextHelper;
@@ -38,14 +39,27 @@ class Note extends DefaultModel
     public function store($data=null)
     {
 
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
 
         //Load Tables
-        $row = new NoteTable;
-        $oldRow = new NoteTable;
+        $row = $this->getTable('Note');
+        $oldRow = $this->getTable('Note');
 
         if ($data == null) {
-            $data = $app->input->getRequest( 'post' );
+            $data = $app->input->getArray(array(
+                'note' => 'string',
+                'deal_id' => 'int',
+                'person_id' => 'int',
+                'name' => 'string',
+                'category_id' => 'int',
+                'company_id' => 'int',
+                'note_id' => 'int',
+                'event_id' => 'int'
+            ));
+        }
+
+        if ( array_key_exists('note_id', $data) ) {
+            $data['id'] = $data['note_id'];
         }
 
         if ( array_key_exists('is_email',$data) ) {
@@ -72,7 +86,7 @@ class Note extends DefaultModel
         }
 
         /** check for and automatically associate and create deals **/
-        if ( array_key_exists('deal_name',$data) && $data['deal_name'] != "" ) {
+        if ( array_key_exists('deal_name',$data) && $data['deal_name'] != "" && (!array_key_exists('deal_id', $data) || empty($data['deal_id']) || $data['deal_id'] == 0) ) {
             $dealModel = new Deal;
             $existingDeal = $dealModel->checkDealName($data['deal_name']);
 
@@ -83,13 +97,12 @@ class Note extends DefaultModel
             } else {
                 $data['deal_id'] = $existingDeal;
             }
-
         }
 
         //date generation
         $date = DateHelper::formatDBDate(date('Y-m-d H:i:s'));
 
-        if ( !array_key_exists('id',$data) ) {
+        if ( empty($data['id']) ) {
             $data['created'] = $date;
             $status = "created";
         } else {
@@ -102,29 +115,18 @@ class Note extends DefaultModel
         $data['owner_id'] = UsersHelper::getUserId();
 
         // Bind the form fields to the table
-        if (!$row->bind($data)) {
-            $this->setError($this->db->getErrorMsg());
+	    try
+	    {
+		    $row->save($data);
+	    }
+	    catch (\Exception $exception)
+	    {
+		    $this->app->enqueueMessage($exception->getMessage(), 'error');
 
-            return false;
-        }
+		    return false;
+	    }
 
-        $app->triggerEvent('onBeforeNoteSave', array(&$row));
-
-        // Make sure the record is valid
-        if (!$row->check()) {
-            $this->setError($this->db->getErrorMsg());
-
-            return false;
-        }
-
-        // Store the web link table to the database
-        if (!$row->store()) {
-            $this->setError($this->db->getErrorMsg());
-
-            return false;
-        }
-
-        if ( array_key_exists('id',$data) ) {
+        if ( array_key_exists('id',$data) && intval($data['id']) ) {
             $id = $data['id'];
         } else {
             $id = $this->db->insertId();
@@ -138,7 +140,7 @@ class Note extends DefaultModel
             $model->storeAttachments($data['email_id'], $data['person_id']);
         }
 
-        $app->triggerEvent('onAfterNoteSave', array(&$row));
+        //$app->triggerEvent('onAfterNoteSave', array(&$row));
 
         return $id;
     }
@@ -150,6 +152,7 @@ class Note extends DefaultModel
      */
     public function getNote($id)
     {
+        $app = \Cobalt\Container::fetch('app');
         //grab db
         $db = JFactory::getDBO();
 
@@ -182,7 +185,7 @@ class Note extends DefaultModel
             }
         }
 
-        $app->trigger('onNoteLoad', array(&$results));
+        //$app->triggerEvent('onNoteLoad', array(&$results));
 
         //return results
         return $results;
@@ -195,7 +198,7 @@ class Note extends DefaultModel
      */
     public function getNotes($object_id = NULL,$type = NULL, $display = true)
     {
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
 
         //grab db
         $db = JFactory::getDBO();
@@ -236,6 +239,7 @@ class Note extends DefaultModel
 
         if ($object_id) {
             switch ($type) {
+                case 'person':
                 case 'people':
                     $query->where('n.person_id ='.$object_id);
                 break;
@@ -319,7 +323,7 @@ class Note extends DefaultModel
             }
         }
 
-        $app->triggerEvent('onNoteLoad', array(&$results));
+        //$app->triggerEvent('onNoteLoad', array(&$results));
 
         if (!$display) {
             //return results
@@ -357,7 +361,7 @@ class Note extends DefaultModel
     public function populateState()
     {
         //get states
-        $app = \Cobalt\Container::get('app');
+        $app = \Cobalt\Container::fetch('app');
         $filter_order = $app->getUserStateFromRequest('Note.filter_order','filter_order','comp.name');
         $filter_order_Dir = $app->getUserStateFromRequest('Note.filter_order_Dir','filter_order_Dir','asc');
 
@@ -386,5 +390,13 @@ class Note extends DefaultModel
 
         $this->setState($state);
 
+    }
+
+    public function remove($id)
+    {
+        $table = $this->getTable('Note');
+        $table->delete($id);
+
+        return $table;
     }
 }

@@ -14,6 +14,9 @@ use JFactory;
 use Joomla\View\AbstractHtmlView;
 use Cobalt\Model\Goal as GoalModel;
 use Cobalt\Helper\UsersHelper;
+use Cobalt\Helper\TextHelper;
+use Cobalt\Helper\DropdownHelper;
+use Cobalt\Helper\RouteHelper;
 
 // no direct access
 defined( '_CEXEC' ) or die( 'Restricted access' );
@@ -38,6 +41,7 @@ class Raw extends AbstractHtmlView
 
             //show individual goals
             if ($type == 'member') {
+                $this->header = TextHelper::_("COBALT_INDIVIDUAL_GOALS");
                 //show goals for exectuvies
                 if ($member_role == 'exec') {
                     $goals = $model->getExecIndividualGoals();
@@ -56,6 +60,7 @@ class Raw extends AbstractHtmlView
 
             //show team goals
             if ($type == 'team') {
+                $this->header = TextHelper::_("COBALT_TEAM_GOALS");
                 //show all goals to exectuvies
                 if ($member_role == 'exec') {
                     $goals = $model->getExecTeamGoals();
@@ -66,6 +71,7 @@ class Raw extends AbstractHtmlView
 
             //show company goals
             if ($type == 'company') {
+                $this->header = TextHelper::_("COBALT_COMPANY_GOALS");
                 $goals = $model->getCompanyGoals();
             }
 
@@ -74,24 +80,39 @@ class Raw extends AbstractHtmlView
 
         } elseif ( $this->getLayout() == 'edit' ) {
 
+            //get type of goal we are requesting to delete
+            $type = $app->input->get('type');
+            $id = $app->input->getInt('id');
+            if ($id) {
+                $model = new GoalModel();
+                $goal = $model->getGoal($id);
+                $this->goal = $goal;
+            }
+
             switch ($type) {
                 case "win_cash":
                     $header = ucwords(TextHelper::_('COBALT_WIN_MORE_CASH'));
+                    $header_img = 'src/Cobalt/media/images/win_more_cash.png';
                     break;
                 case "win_deals":
                     $header = ucwords(TextHelper::_('COBALT_WIN_MORE_DEALS'));
+                    $header_img = 'src/Cobalt/media/images/win_more_deals.png';
                     break;
                 case "move_deals";
                     $header = ucwords(TextHelper::_('COBALT_MOVE_DEALS_FORWARD'));
+                    $header_img = 'src/Cobalt/media/images/move_deals_forward.png';
                     break;
                 case "complete_tasks";
                     $header = ucwords(TextHelper::_('COBALT_COMPLETE_TASKS'));
+                    $header_img = 'src/Cobalt/media/images/complete_more_tasks.png';
                     break;
                 case "write_notes";
                     $header = ucwords(TextHelper::_('COBALT_WRITE_NOTES'));
+                    $header_img = 'src/Cobalt/media/images/write_more_notes.png';
                     break;
                 case "create_deals";
                     $header = ucwords(TextHelper::_('COBALT_CREATE_DEALS'));
+                    $header_img = 'src/Cobalt/media/images/create_deals.png';
                     break;
                 default:
                    $app->redirect('index.php?view=goals');
@@ -99,6 +120,7 @@ class Raw extends AbstractHtmlView
             }
 
             $this->header = $header;
+            $this->header_img = $header_img;
 
         } elseif ( $this->getLayout() != 'add' ) {
 
@@ -162,7 +184,7 @@ class Raw extends AbstractHtmlView
 
         //load java libs
         $doc = JFactory::getDocument();
-        $doc->addScript( JURI::base().'src/Cobalt/media/js/goal_manager.js' );
+        $doc->addScript( \JURI::base().'src/Cobalt/media/js/goal_manager.js' );
 
         //get associated members and teams
         $teams = UsersHelper::getTeams();

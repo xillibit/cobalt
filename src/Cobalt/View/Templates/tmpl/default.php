@@ -11,15 +11,18 @@
 defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
 <div class="container-fluid">
     <?php echo $this->menu['quick_menu']->render(); ?>
-    <div class="row-fluid">
-        <div class="span12" id="content">
+    <div class="row">
+        <div class="col-sm-12" id="content">
             <div id="system-message-container"></div>
-            <div class="row-fluid">
+            <div class="row">
                 <?php echo $this->menu['menu']->render(); ?>
-                <div class="span9">
-                    <legend><h3><?php echo JText::_('COBALT_TASK_PEOPLE_TEMPLATES'); ?></h3></legend>
-                    <div class="alert alert-info"><?php echo JText::_('COBALT_TASK_PEOPLE_TEMPLATES_DESC_1'); ?></div>
+                <div class="col-md-9">
                     <form action="index.php?view=templates" method="post" name="adminForm" id="adminForm">
+                    <div class="page-header">
+                        <?php echo $this->toolbar->render(); ?>
+                        <h3><?php echo JText::_('COBALT_TASK_PEOPLE_TEMPLATES'); ?></h3>
+                    </div>
+                    <div class="alert alert-info"><?php echo JText::_('COBALT_TASK_PEOPLE_TEMPLATES_DESC_1'); ?></div>
                          <table class="table table-striped">
                                 <thead>
                                     <tr>
