@@ -370,7 +370,7 @@ class People extends DefaultModel
 		}
 
 		// group ids
-		$query->group("p.id");
+		$query->group("p.id, c.name, u2.first_name, u2.last_name, u.first_name, u.last_name, stat.name, stat.color, source.name, event.id");
 
 		/** ---------------------------------------------------------------
 		 * Filter data using member role permissions
