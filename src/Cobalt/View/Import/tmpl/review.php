@@ -8,8 +8,11 @@
 # Website: http://www.cobaltcrm.org
 -------------------------------------------------------------------------*/
 // no direct access
-defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
+defined( '_CEXEC' ) or die( 'Restricted access' ); 
 
+$memoryFlag = false;
+
+?>
 <h1><?php echo TextHelper::_('COBALT_REVIEW_YOUR_IMPORT'); ?></h1>
 <?php if ( count($this->import_data) > 0 ) { ?>
     <p><?php echo TextHelper::_('COBALT_REVIEW_IMPORT_MESSAGE'); ?></p>

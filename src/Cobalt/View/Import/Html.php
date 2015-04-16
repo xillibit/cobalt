@@ -27,15 +27,14 @@ class Html extends AbstractHtmlView
         $app = Factory::getApplication();
         $doc = $app->getDocument();
         $doc->addScript($app->get('uri.media.full').'js/import_manager.js');
-
-        if (count($_FILES) > 0)
+		
+        $file = $app->input->files->get('document');
+        
+        if (!empty($file) && $file['error']==0)
         {
-            $model = new ImportModel;
-
-            foreach ($_FILES as $file)
-            {
-                $import_data = $model->readCSVFile($file['tmp_name']);
-            }
+        	$model = new ImportModel;
+        	
+        	$import_data = $model->readCSVFile($file['tmp_name']);
 
             $this->headers = $import_data['headers'];
             unset($import_data['headers']);

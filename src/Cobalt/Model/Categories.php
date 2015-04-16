@@ -35,7 +35,12 @@ class Categories extends DefaultModel
         }
 
         $data['modified'] = $date;
-
+		
+        if ( empty($data['id']) )
+        {
+        	unset($data['id']);
+        }
+        
         // Bind the form fields to the table
 	    try
 	    {

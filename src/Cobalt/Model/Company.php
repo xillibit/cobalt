@@ -570,6 +570,10 @@ class Company extends DefaultModel
             case 'created':
                 $template = DateHelper::formatDate($item->created);
                 break;
+            case 'address_city':
+                $template = $item->address_city;
+                
+                break;
             case 'action':
                 $template = '<div class="btn-group">';
                 // @TODO: make these 2 buttons work
