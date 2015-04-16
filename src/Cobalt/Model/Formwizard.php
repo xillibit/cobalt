@@ -118,9 +118,9 @@ class FormWizard extends DefaultModel
         $db = $this->getDb();
         $query = $db->getQuery(true);
         $query
-            ->select("f.*," . $query->concatenate(array('user.first_name', $db->quote(' '), 'user.last_name')) . " AS owner_name")
+            ->select("f.*," . $query->concatenate(array('users.first_name', $db->quote(' '), 'users.last_name')) . " AS owner_name")
             ->from("#__formwizard AS f")
-            ->leftJoin("#__users AS user ON user.id = f.owner_id");
+            ->leftJoin("#__users AS users ON user.id = f.owner_id");
 
         return $query;
     }
