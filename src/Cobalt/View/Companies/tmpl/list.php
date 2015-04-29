@@ -15,6 +15,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' ); ?>
     <th class="name"><?php echo TextHelper::_('COBALT_COMPANIES_NAME'); ?></th>
     <th class="contact"><?php echo ucwords(TextHelper::_('COBALT_CONTACT_DETAILS')); ?></th>
     <th class="address_city"><?php echo ucwords(TextHelper::_('COBALT_COMPANIES_ADDRESS_CITY')); ?></th>
+    <th class="address_city"><?php echo ucwords(TextHelper::_('COBALT_COMPANIES_ADDRESS_CITY')); ?></th>
     <th class="created" ><?php echo TextHelper::_('COBALT_COMPANIES_ADDED'); ?></th>
     <th class="updated" ><?php echo TextHelper::_('COBALT_COMPANIES_UPDATED'); ?></th>
     <th class="notes" >&nbsp;</th>

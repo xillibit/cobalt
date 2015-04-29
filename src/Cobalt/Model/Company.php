@@ -518,6 +518,7 @@ class Company extends DefaultModel
     public function getDataTableColumns()
     {
         $columns = array();
+        $columns[] = array('data' => 'address_city', 'ordering' => 'c.address_city');
         $columns[] = array('data' => 'id', 'orderable' => false, 'sClass' => 'text-center');
         $columns[] = array('data' => 'name', 'ordering' => 'c.name');
         $columns[] = array('data' => 'contact_info', 'orderable' => false);
@@ -569,6 +570,10 @@ class Company extends DefaultModel
                 endif;
                 $template .= '<div class="hidden"><small>'.$item->description.'</small></div>';
                 break;
+            case 'address_city':
+              	$template = $item->address_city;
+                
+              	break;
             case 'contact_info':
                 $template = $item->phone.'<br>'.$item->email;
                 break;
