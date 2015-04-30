@@ -32,16 +32,18 @@ class Html extends AbstractHtmlView
         
         if (!empty($file) && $file['error']==0)
         {
-        	$model = new ImportModel;
+        	$data_type = $app->input->get('data_type');
         	
-        	$import_data = $model->readCSVFile($file['tmp_name']);
+        	if (empty($data_type) && count($import_data) > 500)
+        	{        	
+        		$model = new ImportModel;
+        	
+        		$import_data = $model->readCSVFile($file['tmp_name']);
 
-            $this->headers = $import_data['headers'];
-            unset($import_data['headers']);
-            $this->import_data = $import_data;
+	            $this->headers = $import_data['headers'];
+	            unset($import_data['headers']);
+	            $this->import_data = $import_data;
 
-            if (count($import_data) > 500)
-            {
                 switch ($app->input->get('import_type'))
                 {
                     case "company":
@@ -71,6 +73,37 @@ class Html extends AbstractHtmlView
                 $msg = TextHelper::_('COBALT_'.$success.'_IMPORTED_ITEMS');
                 $app->redirect(RouteHelper::_('index.php?view='.$view),$msg);
             }
+            else
+          {
+	          	switch ($data_type)
+	          	{
+	          		case 'insee_data':
+	          			$modelInsee = new ImportModelInsee;
+	          			$datafromfile = $modelInsee->readCSVFileInsee($file['tmp_name']);
+	          	
+	          			$modelInsee->prepareDataToImport($datafromfile);
+	          	
+	          			/*$headers = $modelInsee->getHeaders($datafromfile);
+	          			 $modelInsee->injectNewCompaniesInsee($datafromfile['creation']);*/
+	          			 // $modelInsee->updateWithInseeData($datafromfile['mise_a_jour']);
+	          	
+	          	
+	          			die();
+	          	
+	          			$view = "companies";
+	          			break;
+	          			case 'cci_data':
+	          			$modelCCI = new ImportModelCCI;
+	          			$datafromfile = $modelCCI->readCSVFileCCI($file['tmp_name']);
+	          			$modelCCI->injectNewCompaniesCCI($datafromfile);
+	          	
+	          			$view = "companies";
+	          			break;
+	          	}
+	          	
+	          	$this->import_data = $datafromfile;
+	          	$this->headers = $headers;
+          	}
 
             $doc->addScriptDeclaration('import_length='.count($import_data).';');
 
