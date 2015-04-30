@@ -32,7 +32,7 @@ $this
     ->addScript($this->mediaurl.'js/jquery.form.js')
     ->addScript($this->mediaurl.'js/jquery.dataTables.min.js')
     ->addScript($this->mediaurl.'js/dataTables.foundation.js')
-
+    ->addScript('http://yadcf-showcase.appspot.com/resources/js/jquery.dataTables.yadcf.js')
 
     // Add Meta tags
     ->setMetaData('viewport', 'width=device-width, initial-scale=1.0')

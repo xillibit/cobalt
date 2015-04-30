@@ -211,7 +211,41 @@ var Cobalt = {
 
         // store datatable to hash object so it can be used later.
         Cobalt.dataTables[table.attr('id')] = datatable;
+        
+        // Set content filter with plugin Yet Another DataTables Column Filter (Yadcf)
+        if ( loc=='companies' )
+        {
+        	yadcf.init(datatable, [
+        	{
+        		column_number: 2,
+        		filter_type: "text",
+        	},
+        	{
+        		column_number: 3,
+        		filter_type: "date"
+        	}]);
 
+        	jQuery('#yadcf-filter-table-data-table-2').change(function(e) {
+        		filters.ville = jQuery(this).val();
+        		datatable.search(JSON.stringify(filters)).draw();
+        	});
+
+        	jQuery('#yadcf-filter-table-data-table-2-reset').click(function(e) {
+        		filters.ville = '';
+        		datatable.search(JSON.stringify(filters)).draw();
+        	});
+
+        	jQuery('#yadcf-filter-table-data-table-3').change(function(e) {
+        		filters.date_created = jQuery(this).val();
+        		datatable.search(JSON.stringify(filters)).draw();
+        	});
+
+        	jQuery('#yadcf-filter-table-data-table-3-reset').click(function(e) {
+        		filters.date_created = '';
+        		datatable.search(JSON.stringify(filters)).draw();
+        	});
+        }
+        
         // Toggle action bar
         table.change(function() {
             if (table.find('input:checkbox:checked').length > 0) {

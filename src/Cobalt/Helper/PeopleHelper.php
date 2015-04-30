@@ -81,7 +81,7 @@ defined( '_CEXEC' ) or die( 'Restricted access' );
                             'leads' => TextHelper::_('COBALT_ALL_LEADS'),
                             'not_leads' => TextHelper::_('COBALT_ALL_PEOPLE_WHO_ARE_NOT_LEADS')   );
         } else {
-            return array( 'contact' => TextHelper::_('COBALT_CONTACT') , 'lead' => TextHelper::_('COBALT_LEAD') );
+            return array( 'contact' => TextHelper::_('COBALT_CONTACT') , 'lead' => TextHelper::_('COBALT_LEAD'), 'projectowner' => TextHelper::_('COBALT_PROJECTOWNER')  );
         }
     }
 

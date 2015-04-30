@@ -235,7 +235,19 @@ class Company extends DefaultModel
                     $query->where("c.modified >" . $this->db->quote($last_thirty_days));
                 }
 
-                 $query->group("c.id");
+                $company_date_created = $this->getState()->get('Company.'.$view.'_date_created_since');
+                
+                if ($company_date_created != null) {
+                	$query->where(" c.created BETWEEN " . $this->db->quote(DateHelper::formatDBDate($company_date_created)) . " AND now()");
+                }
+                
+                $company_city_filter  = $this->getState()->get('Company.'.$view.'_city');
+                
+                if ($company_city_filter != null) {
+                	$query->where("( c.address_city LIKE " . $this->db->quote('%'.$company_city_filter.'%') . ")");
+                }
+                
+                $query->group("c.id");
 
             }
             else
@@ -491,11 +503,15 @@ class Company extends DefaultModel
         $filter_order           = $this->app->getUserStateFromRequest('Company.filter_order','filter_order','c.name');
         $filter_order_Dir       = $this->app->getUserStateFromRequest('Company.filter_order_Dir','filter_order_Dir','asc');
         $company_filter         = $this->app->getUserStateFromRequest('Company.'.$view.'_name','company_name',null);
-
+        $company_date_filter    = $this->app->getUserStateFromRequest('Company.'.$view.'_date_created_since','date_created',null);
+        $company_city_filter    = $this->app->getUserStateFromRequest('Company.'.$view.'_city','ville',null);
+        
         //set states for reports
         $state->set('Company.filter_order', $filter_order);
         $state->set('Company.filter_order_Dir', $filter_order_Dir);
         $state->set('Company.'.$view.'_name', $company_filter);
+		$state->set('Company.'.$view.'_date_created_since', $company_date_filter);
+        $state->set('Company.'.$view.'_city', $company_city_filter);
 
         // filters
         $item_filter = $this->app->input->getString('item', null);
