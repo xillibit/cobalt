@@ -12,6 +12,7 @@ namespace Cobalt\Controller;
 
 use Cobalt\Helper\RouteHelper;
 use Cobalt\Model\Import as ImportModel;
+use Cobalt\Model\Import as ImportModelInsee;
 use Cobalt\Helper\TextHelper;
 
 // no direct access
@@ -24,14 +25,28 @@ class Import extends DefaultController
         $success = false;
         $data = $this->getInput()->get('import_id', array(), 'ARRAY');
         $import_type = $this->getInput()->getString('import_type');
-
+        
         if (is_array($data) && count($data) > 0)
         {
             switch ($import_type)
             {
                 case "companies":
-                        $import_model = "company";
+                      $import_model = "company";                  
                     break;
+                case "insee_data":
+                      echo "here we go";
+                      
+                      die();
+                
+                      $import_model = "company";
+                  
+                      $model = new ImportModelInsee;
+                          
+                      if ($model->importCSVFileINSEE($data, $import_model))
+                      {
+                        $success = true;
+                      }
+                    break;                       
                 case "deals":
                         $import_model = "deal";
                     break;
@@ -51,7 +66,7 @@ class Import extends DefaultController
             }
         }
 
-        if ($success)
+        /*if ($success)
         {
             $msg = TextHelper::_('COBALT_IMPORT_WAS_SUCCESSFUL');
             $this->getApplication()->redirect(RouteHelper::_('index.php?view=' . $import_type), $msg);
@@ -60,6 +75,6 @@ class Import extends DefaultController
         {
             $msg = TextHelper::_('COBALT_ERROR_IMPORTING');
             $this->getApplication()->redirect(RouteHelper::_('index.php?view=' . $import_type), $msg);
-        }
+        } */
     }
 }
